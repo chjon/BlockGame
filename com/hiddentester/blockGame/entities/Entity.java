@@ -8,14 +8,15 @@ import com.hiddentester.math.Vector2D;
 import com.hiddentester.blockGame.core.Chunk;
 
 public abstract class Entity {
-	protected Chunk containingChunk;
-	protected Vector2D relPos;				//Position of the entity relative to the chunk it is in
-	protected Vector2D vel;
-	protected Vector2D dimensions;
+	static final double FRICTION = 0.90;
+	private Vector2D chunkPos;					//Position of the chunk containing the entity
+	private Vector2D relPos;					//Position of the entity relative to the chunk it is in
+	private Vector2D vel;						//Velocity of entity in blocks per tick.
+	private Vector2D dimensions;
 
 	//Constructor
-	public Entity (Chunk containingChunk, Vector2D relPos, Vector2D vel, Vector2D dimensions) {
-		this.containingChunk = containingChunk;
+	public Entity (Vector2D chunkPos, Vector2D relPos, Vector2D vel, Vector2D dimensions) {
+		this.chunkPos = chunkPos;
 		setRelPos(relPos);
 		this.vel = vel;
 		this.dimensions = dimensions;
@@ -23,12 +24,12 @@ public abstract class Entity {
 
 	//Accessors/Mutators:
 
-	public Chunk getContainingChunk () {
-		return containingChunk;
+	public Vector2D getChunkPos() {
+		return chunkPos;
 	}
 
-	public void setContainingChunk (Chunk containingChunk) {
-		this.containingChunk = containingChunk;
+	public void setChunkPos(Vector2D chunkPos) {
+		this.chunkPos = chunkPos;
 	}
 
 	public Vector2D getRelPos () {
@@ -42,26 +43,24 @@ public abstract class Entity {
 	}
 
 	public Vector2D getAbsPos () {
-		return Vector2D.add(Vector2D.scale(containingChunk.getPos(), Chunk.SIZE), relPos);
+		return Vector2D.add(Vector2D.scale(chunkPos, Chunk.SIZE), relPos);
 	}
 
 	public void setAbsPos (Vector2D absPos) {
-		Vector2D chunkPos = new Vector2D(
+		chunkPos = new Vector2D(
 				Math.floor(absPos.getMagX() / Chunk.SIZE),
-				Math.floor(absPos.getMagY() / Chunk.SIZE));
-		setRelPos(absPos);
+				Math.floor(absPos.getMagY() / Chunk.SIZE)
+		);
 
-		if (!containingChunk.getPos().equals(chunkPos)) {
-			containingChunk = Chunk.loadChunk(chunkPos);
-		}
+		setRelPos(absPos);
 	}
 
 	public Vector2D getVel () {
 		return this.vel;
 	}
 
-	public void setVel (Vector2D vel) {
-		this.vel = vel;
+	public void accelerate (Vector2D vel) {
+		this.vel = Vector2D.add(this.vel, vel);
 	}
 
 	public Vector2D getDimensions () {
@@ -73,13 +72,29 @@ public abstract class Entity {
 	}
 
 	//Move entity
-	public void move (Vector2D displacement) {
-		setAbsPos(Vector2D.add(getAbsPos(), displacement));
+	public void move () {
+		//Change position according to velocity
+		Vector2D newPos = Vector2D.add(getRelPos(), vel);
+
+		//Update chunkPos if player has passed between chunks
+
+		if (newPos.getMagX() < 0 || newPos.getMagX() >= Chunk.SIZE) {
+			chunkPos.setMagX(chunkPos.getMagX() + Math.floor(newPos.getMagX() / Chunk.SIZE));
+		}
+
+		if (newPos.getMagY() < 0 || newPos.getMagY() >= Chunk.SIZE) {
+			chunkPos.setMagY(chunkPos.getMagY() + Math.floor(newPos.getMagY() / Chunk.SIZE));
+		}
+
+		setRelPos(newPos);
+
+		//Scale velocity according to friction
+		this.vel = Vector2D.scale(this.vel, FRICTION);
 	}
 
 	//Converts entity data to a string
 	@Override
 	public String toString () {
-		return "(" + this.containingChunk.getPos() + "," + this.relPos + "," + this.vel + "," + this.dimensions + ")";
+		return "(" + this.chunkPos + "," + this.relPos + "," + this.vel + "," + this.dimensions + ")";
 	}
 }

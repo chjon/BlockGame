@@ -1,10 +1,10 @@
 package com.hiddentester.blockGame.blocks;
 
-public class Air extends BlockUncollidable {
+public class Block_Air extends BlockUncollidable {
 	private static final String NAME = "Air";
 	private static final int MINING_LEVEL = -1;
 
-	public Air () {
+	public Block_Air () {
 		super (NAME, MINING_LEVEL);
 	}
 }

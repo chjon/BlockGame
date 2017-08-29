@@ -48,13 +48,31 @@ public class Vector2D {
 		return "[" + this.magX + "," + this.magY + "]";
 	}
 
+	//Calculate magnitude squared of vector based on components (Pythagorean)
+	public double getMagSquared () {
+		return Math.pow(magX, 2) + Math.pow(magY, 2);
+	}
+
 	//Calculate magnitude of vector based on components (Pythagorean)
 	public double getMag () {
-		return Math.sqrt(Math.pow(magX, 2) + Math.pow(magY, 2));
+		return Math.sqrt(getMagSquared());
+	}
+
+	//Calculate magnitude of vector based on components (Manhattan)
+	public double getMagManhattan () {
+		return Math.abs(magX) + Math.abs(magY);
 	}
 
 	//Calculate the angle in radians of the vector CCW from the positive x-axis
-	public double getAng () {
+	public double getAng () throws IllegalDirectionException {
+		if (magY == 0) {
+			if (magX == 0) {
+				throw new IllegalDirectionException();
+			}
+
+			return 0;
+		}
+
 		return Math.atan(magX / magY);
 	}
 
@@ -63,12 +81,30 @@ public class Vector2D {
 		return (this.magX == comparand.magX) && (this.magY == comparand.magY);
 	}
 
-
 	//Scale a vector
 	public static Vector2D scale (Vector2D a, double scaleFactor) {
 		return new Vector2D(
 				a.magX * scaleFactor,
-				a.magY * scaleFactor);
+				a.magY * scaleFactor
+		);
+	}
+
+	//Set the magnitude of a vector without changing direction
+	public static Vector2D setMag (Vector2D a, double mag) throws IllegalDirectionException {
+		if (a.getMagManhattan() == 0) {
+			throw new IllegalDirectionException();
+		}
+
+		return scale(a, mag / a.getMag());
+	}
+
+	//Set the angle in radians of a vector CCW from the positive x-axis without changing magnitude
+	public static Vector2D setAng (Vector2D a, double ang) throws IllegalDirectionException {
+		if (a.getMagManhattan() == 0) {
+			throw new IllegalDirectionException();
+		}
+
+		return scale(new Vector2D(Math.cos(ang), Math.sin(ang)), a.getMag());
 	}
 
 	//Calculate the sum of two vectors
