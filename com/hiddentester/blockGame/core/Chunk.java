@@ -6,28 +6,20 @@ package com.hiddentester.blockGame.core;
 
 import com.hiddentester.math.Vector2D;
 import com.hiddentester.blockGame.blocks.Block;
-import com.hiddentester.blockGame.blocks.Stone;
-import com.hiddentester.blockGame.blocks.Air;
+import com.hiddentester.blockGame.blocks.Block_Air;
 
 public class Chunk {
 	public static final int SIZE = 16;
 	private Vector2D pos;
-	private Block[][] blocks;
+	Block[][] blocks;
 
-	//Constructor
+	//Constructors:
+
 	public Chunk (Vector2D pos) {
 		this.pos = new Vector2D(pos);
 		blocks = new Block[SIZE][SIZE];
 
-		for (int i = 0; i < SIZE; i++) {
-			for (int j = 0; j < SIZE; j++) {
-				if (i == 0 || j == 0 || i == j) {
-					blocks[i][j] = new Stone();
-				} else {
-					blocks[i][j] = new Air();
-				}
-			}
-		}
+		populate();
 	}
 
 	//Accessors:
@@ -38,16 +30,6 @@ public class Chunk {
 
 	public Block[][] getBlocks () {
 		return blocks;
-	}
-
-	//Unload chunk
-	public void unload () {
-
-	}
-
-	//Load chunk
-	public static Chunk loadChunk (Vector2D pos) {
-		return new Chunk(pos);
 	}
 
 	//Converts chunk data to a string
@@ -70,5 +52,14 @@ public class Chunk {
 		output += "}";
 
 		return output;
+	}
+
+	//Fill chunk
+	private void populate () {
+		for (int i = 0; i < SIZE; i++) {
+			for (int j = 0; j < SIZE; j++) {
+				blocks[i][j] = new Block_Air();
+			}
+		}
 	}
 }

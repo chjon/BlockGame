@@ -8,12 +8,12 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Window {
-	private static final String TITLE = "Puzzle Miner";
+	private static final String TITLE = "BlockGame";
 
 	//Constructor:
 
-	public Window (Drawing draw) {
-		JFrame frame = new JFrame (TITLE);
+	public Window (String saveFile, Drawing draw) {
+		JFrame frame = new JFrame (TITLE + " - " + saveFile);
 
 		//Initialize frame properties
 		frame.add(draw);
