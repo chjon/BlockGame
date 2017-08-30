@@ -4,11 +4,17 @@
 
 package com.hiddentester.blockGame.entities;
 
-import com.hiddentester.math.Vector2D;
+import com.hiddentester.util.ChunkPosVector;
+import com.hiddentester.util.Vector2D;
 
 public abstract class EntityCollidable extends Entity {
 	//Constructor
-	public EntityCollidable (Vector2D chunkPos, Vector2D relPos, Vector2D vel, Vector2D dimensions) {
+	public EntityCollidable (ChunkPosVector chunkPos, Vector2D relPos, Vector2D vel, Vector2D dimensions) {
 		super(chunkPos, relPos, vel, dimensions);
+	}
+
+	@Override
+	public void move () {
+		super.move();
 	}
 }

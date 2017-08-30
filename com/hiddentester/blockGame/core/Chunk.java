@@ -4,19 +4,20 @@
 
 package com.hiddentester.blockGame.core;
 
-import com.hiddentester.math.Vector2D;
 import com.hiddentester.blockGame.blocks.Block;
 import com.hiddentester.blockGame.blocks.Block_Air;
+import com.hiddentester.blockGame.blocks.Block_Stone;
+import com.hiddentester.util.ChunkPosVector;
 
 public class Chunk {
 	public static final int SIZE = 16;
-	private Vector2D pos;
+	private ChunkPosVector pos;
 	Block[][] blocks;
 
 	//Constructors:
 
-	public Chunk (Vector2D pos) {
-		this.pos = new Vector2D(pos);
+	public Chunk (ChunkPosVector pos) {
+		this.pos = new ChunkPosVector(pos);
 		blocks = new Block[SIZE][SIZE];
 
 		populate();
@@ -24,7 +25,7 @@ public class Chunk {
 
 	//Accessors:
 
-	public Vector2D getPos () {
+	public ChunkPosVector getPos () {
 		return this.pos;
 	}
 
@@ -58,7 +59,11 @@ public class Chunk {
 	private void populate () {
 		for (int i = 0; i < SIZE; i++) {
 			for (int j = 0; j < SIZE; j++) {
-				blocks[i][j] = new Block_Air();
+				if (Chunk.SIZE / 2 * (Math.sin((pos.getMagX() * Chunk.SIZE + i) / (double) Chunk.SIZE)) < Chunk.SIZE * pos.getMagY() + j) {
+					blocks[i][j] = new Block_Air();
+				} else {
+					blocks[i][j] = new Block_Stone();
+				}
 			}
 		}
 	}
