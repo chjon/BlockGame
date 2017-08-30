@@ -4,7 +4,7 @@
 
 package com.hiddentester.blockGame.io;
 
-import com.hiddentester.math.Vector2D;
+import com.hiddentester.util.Vector2D;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;

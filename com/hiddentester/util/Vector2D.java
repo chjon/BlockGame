@@ -2,7 +2,7 @@
  * This class describes a 2D vector and its operations *
  *******************************************************/
 
-package com.hiddentester.math;
+package com.hiddentester.util;
 
 public class Vector2D {
 	private double magX, magY;

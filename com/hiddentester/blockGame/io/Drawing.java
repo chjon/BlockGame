@@ -8,9 +8,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 
-import com.hiddentester.math.Vector2D;
+import com.hiddentester.util.ChunkPosVector;
+import com.hiddentester.util.Vector2D;
 import com.hiddentester.blockGame.blocks.Block;
-import com.hiddentester.blockGame.blocks.Block_Air;
 import com.hiddentester.blockGame.blocks.Block_Stone;
 import com.hiddentester.blockGame.core.Game;
 import com.hiddentester.blockGame.entities.Player;
@@ -49,17 +49,17 @@ public class Drawing extends JComponent {
 		offset = Vector2D.scale(offset, 1.0 / blockSize);
 		offset.setMagY(-offset.getMagY());
 
-		Vector2D chunkPos = game.getPlayer().getChunkPos();
+		ChunkPosVector chunkPos = game.getPlayer().getChunkPos();
 		Vector2D relPos = Vector2D.add(offset, game.getPlayer().getRelPos());
 
 		//Update chunkPos if the mouse is in a different chunk than the player
 
 		if (relPos.getMagX() < 0 || relPos.getMagX() >= Chunk.SIZE) {
-			chunkPos.setMagX(chunkPos.getMagX() + Math.floor(relPos.getMagX() / Chunk.SIZE));
+			chunkPos.setMagX(chunkPos.getMagX() + (int) Math.floor(relPos.getMagX() / Chunk.SIZE));
 		}
 
 		if (relPos.getMagY() < 0 || relPos.getMagY() >= Chunk.SIZE) {
-			chunkPos.setMagY(chunkPos.getMagY() + Math.floor(relPos.getMagY() / Chunk.SIZE));
+			chunkPos.setMagY(chunkPos.getMagY() + (int) Math.floor(relPos.getMagY() / Chunk.SIZE));
 		}
 
 		//Take the modulus of each component of the vector
@@ -82,8 +82,8 @@ public class Drawing extends JComponent {
 		updateScale();
 
 		//Fill background
-		g.setColor(Color.WHITE);
-		g.fillRect(0, 0, getWidth(), getHeight());
+		//g.setColor(Color.WHITE);
+		//g.fillRect(0, 0, getWidth(), getHeight());
 
 		//Offset graphics
 		g.translate(this.getWidth() / 2, this.getHeight() / 2);
@@ -103,8 +103,14 @@ public class Drawing extends JComponent {
 					//Loop through each block
 					for (int i = 0; i < blocks.length; i++) {
 						for (int j = 0; j < blocks[i].length; j++) {
+
 							//Get and scale position of block relative to player
-							Vector2D relPos = Vector2D.sub(Vector2D.scale(curChunk.getPos(), Chunk.SIZE), player.getAbsPos());
+							Vector2D relPos = Vector2D.sub(new Vector2D(
+									Chunk.SIZE * (curChunk.getPos().getMagX() - player.getChunkPos().getMagX()),
+									Chunk.SIZE * (curChunk.getPos().getMagY() - player.getChunkPos().getMagY())),
+									player.getRelPos()
+							);
+
 							relPos.setMagX(relPos.getMagX() + i);
 							relPos.setMagY(relPos.getMagY() + j);
 							relPos = Vector2D.scale(relPos, blockSize);

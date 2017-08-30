@@ -2,7 +2,7 @@
  * This class is the exception that is thrown for direction operations on zero vectors *
  ***************************************************************************************/
 
-package com.hiddentester.math;
+package com.hiddentester.util;
 
 public class IllegalDirectionException extends Exception {
 	private static final String DEFAULT_MESSAGE = "Vector has no direction";

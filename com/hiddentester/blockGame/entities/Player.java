@@ -4,10 +4,10 @@
 
 package com.hiddentester.blockGame.entities;
 
+import com.hiddentester.util.ChunkPosVector;
 import com.hiddentester.blockGame.core.GameClock;
-import com.hiddentester.math.Vector2D;
+import com.hiddentester.util.Vector2D;
 import com.hiddentester.blockGame.core.Game;
-import com.hiddentester.blockGame.core.Chunk;
 
 public class Player extends EntityCollidable {
 	private static final Vector2D DIMENSIONS = new Vector2D(0.6, 1.8);
@@ -24,7 +24,7 @@ public class Player extends EntityCollidable {
 	private Game game;
 
 	//Constructor
-	public Player (Game game, Vector2D chunkPos, Vector2D relPos, Vector2D vel) {
+	public Player (Game game, ChunkPosVector chunkPos, Vector2D relPos, Vector2D vel) {
 		super(chunkPos, relPos, vel, DIMENSIONS);
 		this.game = game;
 	}

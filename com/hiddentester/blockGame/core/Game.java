@@ -5,7 +5,8 @@
 package com.hiddentester.blockGame.core;
 
 import com.hiddentester.blockGame.entities.Entity;
-import com.hiddentester.math.Vector2D;
+import com.hiddentester.util.ChunkPosVector;
+import com.hiddentester.util.Vector2D;
 import com.hiddentester.blockGame.entities.Player;
 import com.hiddentester.blockGame.io.*;
 
@@ -28,7 +29,7 @@ public class Game {
 		//Create player
 		player = new Player(
 				this,
-				new Vector2D(0, 0),
+				new ChunkPosVector(0, 0),
 				new Vector2D(2, 1),
 				new Vector2D()
 		);
