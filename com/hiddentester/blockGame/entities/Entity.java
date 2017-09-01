@@ -92,11 +92,11 @@ public abstract class Entity {
 
 		//Set velocity to zero if sufficiently small
 
-		if (Math.abs(this.vel.getMagX()) < Math.pow(10, -5)) {
+		if (Math.abs(this.vel.getMagX()) < Math.pow(10, -4)) {
 			this.vel.setMagX(0);
 		}
 
-		if (Math.abs(this.vel.getMagY()) < Math.pow(10, -5)) {
+		if (Math.abs(this.vel.getMagY()) < Math.pow(10, -4)) {
 			this.vel.setMagY(0);
 		}
 	}

@@ -182,56 +182,9 @@ public class ChunkLoader {
 
 	//Get array of blocks contained within a specified region
 	public Block[][] getBlocks (
-			IntVector originalChunkPos1, IntVector originalBlockPos1,
-			IntVector originalChunkPos2, IntVector originalBlockPos2
+			IntVector chunkPos1, IntVector blockPos1,
+			IntVector chunkPos2, IntVector blockPos2
 	) {
-		IntVector chunkPos1 = new IntVector(originalChunkPos1);
-		IntVector chunkPos2 = new IntVector(originalChunkPos2);
-		IntVector blockPos1 = new IntVector(originalBlockPos1);
-		IntVector blockPos2 = new IntVector(originalBlockPos2);
-
-		//Make sure chunkPos1 is left of chunkPos2
-		if (chunkPos1.getMagX() > chunkPos2.getMagX()) {
-			//Swap chunk x-coordinates
-			int temp = chunkPos1.getMagX();
-			chunkPos1.setMagX(chunkPos2.getMagX());
-			chunkPos2.setMagX(temp);
-
-			//Swap block x-coordinates
-			temp = blockPos1.getMagX();
-			blockPos1.setMagX(blockPos2.getMagX());
-			blockPos2.setMagX(temp);
-		//Make sure blockPos1 is left of blockPos2
-		} else if (chunkPos1.getMagX() == chunkPos2.getMagX() &&
-				blockPos1.getMagX() > blockPos2.getMagX()) {
-
-			//Swap block x-coordinates
-			int temp = blockPos1.getMagX();
-			blockPos1.setMagX(blockPos2.getMagX());
-			blockPos2.setMagX(temp);
-		}
-
-		//Make sure chunkPos1 is below chunkPos2
-		if (chunkPos1.getMagY() > chunkPos2.getMagY()) {
-			//Swap chunk y-coordinates
-			int temp = chunkPos1.getMagY();
-			chunkPos1.setMagY(chunkPos2.getMagY());
-			chunkPos2.setMagY(temp);
-
-			//Swap block y-coordinates
-			temp = blockPos1.getMagY();
-			blockPos1.setMagY(blockPos2.getMagY());
-			blockPos2.setMagY(temp);
-		//Make sure blockPos1 is below blockPos2
-		} else if (chunkPos1.getMagY() == chunkPos2.getMagY() &&
-				blockPos1.getMagY() > blockPos2.getMagY()) {
-
-			//Swap block y-coordinates
-			int temp = blockPos1.getMagY();
-			blockPos1.setMagY(blockPos2.getMagY());
-			blockPos2.setMagY(temp);
-		}
-
 		//Array of chunks containing the region
 		Chunk[][] chunks = getChunks(chunkPos1, chunkPos2);
 

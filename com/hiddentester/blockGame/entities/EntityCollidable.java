@@ -41,12 +41,6 @@ public abstract class EntityCollidable extends Entity {
 	//------------------------------------------------------\\
 
 	private boolean collides (BlockCollidable block, IntVector blockPos) {
-		//An entity will not collide with a block it is already in.
-		if (Math.abs(blockPos.getMagX() + 0.5 - this.blockPos.getMagX()) < this.dimensions.getMagX() / 2 + 0.5 &&
-				Math.abs(blockPos.getMagY() + 0.5 - this.blockPos.getMagY()) < this.dimensions.getMagY() / 2 + 0.5) {
-			return false;
-		}
-
 		//Check side surfaces if the entity's velocity has a horizontal component
 		if (this.vel.getMagX() != 0) {
 			float blockSurfaceX = blockPos.getMagX();
@@ -57,16 +51,25 @@ public abstract class EntityCollidable extends Entity {
 			if (this.vel.getMagX() < 0) {
 				entitySurfaceX -= this.dimensions.getMagX() / 2;
 				blockSurfaceX++;
+
+				if (blockSurfaceX > entitySurfaceX) {
+					return false;
+				}
 			} else {
 				entitySurfaceX += this.dimensions.getMagX() / 2;
+
+				if (blockSurfaceX < entitySurfaceX) {
+					return false;
+				}
 			}
 
 			slope1 = ((blockPos.getMagY()) - (this.blockPos.getMagY() + this.dimensions.getMagY() / 2)) / (blockSurfaceX - entitySurfaceX);
 			slope2 = ((blockPos.getMagY() + 1) - (this.blockPos.getMagY() - this.dimensions.getMagY() / 2)) / (blockSurfaceX - entitySurfaceX);
-			velSlope = this.vel.getSlope();
+			velSlope = this.vel.getMagY() / this.vel.getMagX();
 
 			//Detect collision
 			if (!((slope1 > velSlope && slope2 > velSlope) || (slope1 < velSlope && slope2 < velSlope))) {
+				System.out.println(blockPos);
 				return true;
 			}
 		}
@@ -81,16 +84,25 @@ public abstract class EntityCollidable extends Entity {
 			if (this.vel.getMagY() < 0) {
 				entitySurfaceY -= this.dimensions.getMagY() / 2;
 				blockSurfaceY++;
+
+				if (blockSurfaceY > entitySurfaceY) {
+					return false;
+				}
 			} else {
-				entitySurfaceY += this.dimensions.getMagX() / 2;
+				entitySurfaceY += this.dimensions.getMagY() / 2;
+
+				if (blockSurfaceY < entitySurfaceY) {
+					return false;
+				}
 			}
 
-			slope1 = (blockSurfaceY - entitySurfaceY) / ((blockPos.getMagX()) - (this.blockPos.getMagX() + this.dimensions.getMagX() / 2));
-			slope2 = (blockSurfaceY - entitySurfaceY) / ((blockPos.getMagX() + 1) - (this.blockPos.getMagX() - this.dimensions.getMagY() / 2));
-			velSlope = this.vel.getSlope();
+			slope1 = ((blockPos.getMagX()) - (this.blockPos.getMagX() + this.dimensions.getMagX() / 2)) / (blockSurfaceY - entitySurfaceY);
+			slope2 = ((blockPos.getMagX() + 1) - (this.blockPos.getMagX() - this.dimensions.getMagX() / 2)) / (blockSurfaceY - entitySurfaceY);
+			velSlope = this.vel.getMagX() / this.vel.getMagY();
 
 			//Detect collision
 			if ((slope1 > velSlope && slope2 < velSlope) || (slope1 < velSlope && slope2 > velSlope)) {
+				System.out.println(blockPos);
 				return true;
 			}
 		}
@@ -98,118 +110,30 @@ public abstract class EntityCollidable extends Entity {
 		return false;
 	}
 
-	//Calculate the position at which an entity will collide with a block
-
-	//-----------[Summary of Collision Algorithm]-----------\\
-	//														\\
-	//	1.	Check vertical surfaces (on the left and right)	\\
-	//		if the entity is moving horizontally. Check		\\
-	//		horizontal surfaces (on the top and bottom) if	\\
-	//		the entity is moving vertically.				\\
-	//														\\
-	//	2.	Find the multiple of the velocity needed in		\\
-	//		order to move the outer edge of the entity to	\\
-	// 		the x or y coordinate of the collidable			\\
-	// 		surface.										\\
-	//														\\
-	//	3.	Use this multiple to scale the velocity to find	\\
-	//		the position of the entity if the x or y		\\
-	// 		coordinate of its outer edge is	moved to the x	\\
-	//		or y coordinate of the collidable surface.		\\
-	//														\\
-	//	4.	If the edges of the entity and the collidable	\\
-	//		surface are intersecting, the entity has		\\
-	//		collided with the surface.						\\
-	//														\\
-	//------------------------------------------------------\\
-
-	private Vector2D velAfterCollision (BlockCollidable block, IntVector blockPos) {
-		//Check whether the entity collides with the block
-		if (!collides(block, blockPos)) {
-			return this.vel;
-		}
-
-		Vector2D newVel = new Vector2D(this.vel);
-
-		//Check side surfaces if the entity's velocity has a horizontal component
-		if (this.vel.getMagX() != 0) {
-			float surfaceX = blockPos.getMagX();
-
-			//Check right surface if the entity is moving to the left
-			if (this.vel.getMagX() < 0) {
-				surfaceX++;
-			}
-
-			//Find scale factor needed to move the x/y coordinate of the entity to the x/y coordinate of the surface
-			float scaleFactor =
-					(Math.abs(surfaceX - this.blockPos.getMagX()) -
-					this.dimensions.getMagX() / 2) / this.vel.getMagX();
-
-			// If the velocity needed in order to move the entity
-			// is greater than the current velocity or is in the
-			// other direction, the entity does not collide.
-
-			if (scaleFactor >= 0 && scaleFactor <= 1) {
-				newVel = Vector2D.scale(this.vel, scaleFactor);
-
-				if (Math.abs(blockPos.getMagY() + 0.5 - Vector2D.add(this.blockPos, newVel).getMagY()) < this.dimensions.getMagY() / 2 + 0.5) {
-					newVel.setMagY(this.vel.getMagY());
-				}
-			}
-		}
-
-		//Check top/bottom surfaces if the entity's velocity has a vertical component
-		if (this.vel.getMagY() != 0) {
-			float surfaceY = blockPos.getMagY();
-
-			//Check top surface if the entity is moving down
-			if (this.vel.getMagY() < 0) {
-				surfaceY++;
-			}
-
-			float scaleFactor =
-					(Math.abs(surfaceY - this.blockPos.getMagY()) -
-					this.dimensions.getMagY() / 2) / vel.getMagY();
-
-			// If the velocity needed in order to move the entity
-			// is greater than the current velocity or is in the
-			// other direction, the entity does not collide.
-
-			if (scaleFactor >= 0 && scaleFactor <= 1) {
-				newVel = Vector2D.scale(this.vel, scaleFactor);
-
-				if (Math.abs(blockPos.getMagX() + 0.5 - Vector2D.add(this.blockPos, newVel).getMagX()) < this.dimensions.getMagX() / 2 + 0.5) {
-					newVel.setMagX(this.vel.getMagX());
-				}
-			}
-		}
-
-		//Return original velocity if entity does not collide with block
-		return newVel;
-	}
-
-	//Get an array of all the blocks that are possibly in between the entity and its destination
-
-	private Block[][] getBlocksInPath () {
-		//Find a pair of vectors bounding the entire entity and its destination
-		IntVector chunkPos1 = new IntVector(this.chunkPos);
-		IntVector chunkPos2 = new IntVector(this.chunkPos);
-		Vector2D blockPos1 = new Vector2D(this.blockPos);
-		Vector2D blockPos2 = new Vector2D(this.blockPos);
-
+	//Find a set of vectors bounding the entire entity and its destination
+	private void findBoundingPositions (
+			IntVector chunkPos1, Vector2D blockPos1,
+			IntVector chunkPos2, Vector2D blockPos2
+	) {
 		//Change the block positions to account for the entity's dimensions based on its velocity
 
 		if (this.vel.getMagX() > 0) {
+			blockPos1.setMagX(blockPos1.getMagX() + this.dimensions.getMagX() / 2);
+			blockPos2.setMagX(blockPos2.getMagX() + this.dimensions.getMagX() / 2 + this.vel.getMagX());
+		} else if (this.vel.getMagX() < 0) {
 			blockPos1.setMagX(blockPos1.getMagX() - this.dimensions.getMagX() / 2);
-			blockPos2.setMagX(blockPos2.getMagX() + this.dimensions.getMagX() / 2);
+			blockPos2.setMagX(blockPos2.getMagX() - this.dimensions.getMagX() / 2 + this.vel.getMagX());
 		} else {
 			blockPos1.setMagX(blockPos1.getMagX() + this.dimensions.getMagX() / 2);
 			blockPos2.setMagX(blockPos2.getMagX() - this.dimensions.getMagX() / 2);
 		}
 
 		if (this.vel.getMagY() > 0) {
+			blockPos1.setMagY(blockPos1.getMagY() + this.dimensions.getMagY() / 2);
+			blockPos2.setMagY(blockPos2.getMagY() + this.dimensions.getMagY() / 2 + this.vel.getMagY());
+		} else if (this.vel.getMagY() < 0) {
 			blockPos1.setMagY(blockPos1.getMagY() - this.dimensions.getMagY() / 2);
-			blockPos2.setMagY(blockPos2.getMagY() + this.dimensions.getMagY() / 2);
+			blockPos2.setMagY(blockPos2.getMagY() - this.dimensions.getMagY() / 2 + this.vel.getMagY());
 		} else {
 			blockPos1.setMagY(blockPos1.getMagY() + this.dimensions.getMagY() / 2);
 			blockPos2.setMagY(blockPos2.getMagY() - this.dimensions.getMagY() / 2);
@@ -219,10 +143,47 @@ public abstract class EntityCollidable extends Entity {
 		Entity.updateChunkPos(chunkPos1, blockPos1);
 		Entity.updateChunkPos(chunkPos2, blockPos2);
 
-		//Get array of blocks bounded by the two positions
-		return chunkLoader.getBlocks(
-				chunkPos1, new IntVector(blockPos1), chunkPos2, new IntVector(blockPos2)
-		);
+		//Make sure chunkPos1 is left of chunkPos2
+		if (chunkPos1.getMagX() > chunkPos2.getMagX()) {
+			//Swap chunk x-coordinates
+			float temp = chunkPos1.getMagX();
+			chunkPos1.setMagX(chunkPos2.getMagX());
+			chunkPos2.setMagX((int) temp);
+
+			//Swap block x-coordinates
+			temp = blockPos1.getMagX();
+			blockPos1.setMagX(blockPos2.getMagX());
+			blockPos2.setMagX(temp);
+			//Make sure blockPos1 is left of blockPos2
+		} else if (chunkPos1.getMagX() == chunkPos2.getMagX() &&
+				blockPos1.getMagX() > blockPos2.getMagX()) {
+
+			//Swap block x-coordinates
+			float temp = blockPos1.getMagX();
+			blockPos1.setMagX(blockPos2.getMagX());
+			blockPos2.setMagX(temp);
+		}
+
+		//Make sure chunkPos1 is below chunkPos2
+		if (chunkPos1.getMagY() > chunkPos2.getMagY()) {
+			//Swap chunk y-coordinates
+			float temp = chunkPos1.getMagY();
+			chunkPos1.setMagY(chunkPos2.getMagY());
+			chunkPos2.setMagY((int) temp);
+
+			//Swap block y-coordinates
+			temp = blockPos1.getMagY();
+			blockPos1.setMagY(blockPos2.getMagY());
+			blockPos2.setMagY(temp);
+			//Make sure blockPos1 is below blockPos2
+		} else if (chunkPos1.getMagY() == chunkPos2.getMagY() &&
+				blockPos1.getMagY() > blockPos2.getMagY()) {
+
+			//Swap block y-coordinates
+			float temp = blockPos1.getMagY();
+			blockPos1.setMagY(blockPos2.getMagY());
+			blockPos2.setMagY(temp);
+		}
 	}
 
 	//Detect and account for collision in movement
@@ -236,62 +197,77 @@ public abstract class EntityCollidable extends Entity {
 	// 		entity, look for collidable blocks.		\\
 	// 												\\
 	//	3.	Determine whether the collidable		\\
-	// 		surface is in the path of movement		\\
-	//		and change the velocity such that a		\\
+	// 		surface is in the path of movement.		\\
+	//												\\
+	//	4.	Change the velocity such that a			\\
 	// 		subsequent movement will not surpass	\\
 	// 		the discovered surface.					\\
 	// 												\\
-	//	4.	Move the entity.						\\
+	//	5.	Move the entity.						\\
 	// 												\\
 	//----------------------------------------------\\
 
 	@Override
 	public void move () {
-		Vector2D newVel = new Vector2D(vel);
+		//Consider movement only if velocity is not zero
+		if (vel.getMagSquared() > 0) {
+			Vector2D newVel = new Vector2D(vel);
 
-		//Step 1 of movement algorithm
-		//Get array of blocks containing the entity and its destination
-		Block[][] blocks = getBlocksInPath();
+			//Step 1 of movement algorithm
+			//Get array of blocks containing the entity and its destination
+			IntVector chunkPos1 = new IntVector(this.chunkPos);
+			Vector2D blockPos1 = new Vector2D(this.blockPos);
+			IntVector chunkPos2 = new IntVector(this.chunkPos);
+			Vector2D blockPos2 = new Vector2D(this.blockPos);
 
-		//Loop through blocks
-		for (int i = 0; i < blocks.length; i++) {
-			for (int j = 0; j < blocks[i].length; j++) {
-				//Step 2 of movement algorithm:
-				//Check if block is collidable
-				if (blocks[i][j] instanceof BlockCollidable) {
+			findBoundingPositions(chunkPos1, blockPos1, chunkPos2, blockPos2);
 
-					//Calculate block position
-					IntVector blockPos = new IntVector(
-							(int) Math.floor(this.blockPos.getMagX()),
-							(int) Math.floor(this.blockPos.getMagY())
-					);
+			Block[][] blocks = chunkLoader.getBlocks(
+					chunkPos1, new IntVector(blockPos1),
+					chunkPos2, new IntVector(blockPos2)
+			);
 
-					//The following calculation is based on the behaviour of ChunkLoader.getBlocks().
-					//Add to relative player position if the entity is moving to the right
-					//Subtract from relative player position if the entity is moving to the left
-					//Add to relative player position if the entity is moving up
-					//Subtract from relative player position if the entity is moving down
+			//Loop through blocks
+			for (int i = 0; i < blocks.length; i++) {
+				for (int j = 0; j < blocks[i].length; j++) {
+					//Step 2 of movement algorithm:
+					//Check if block is collidable
+					if (blocks[i][j] instanceof BlockCollidable) {
+						//Calculate global chunk position
+						IntVector chunkPos = new IntVector(
+								(i + (int) Math.floor(blockPos1.getMagX())) / Chunk.SIZE + chunkPos1.getMagX(),
+								(j + (int) Math.floor(blockPos1.getMagY())) / Chunk.SIZE + chunkPos1.getMagY()
+						);
 
-					if (vel.getMagX() > 0) {
-						blockPos.setMagX(blockPos.getMagX() + i);
-					} else if (vel.getMagX() < 0) {
-						blockPos.setMagX(blockPos.getMagX() - i);
-					}
+						//Calculate block position relative to chunk
+						IntVector blockPos = new IntVector(
+								((i + (int) Math.floor(blockPos1.getMagX())) % Chunk.SIZE + Chunk.SIZE) % Chunk.SIZE,
+								((j + (int) Math.floor(blockPos1.getMagY())) % Chunk.SIZE + Chunk.SIZE) % Chunk.SIZE
+						);
+						
+						//Calculate block position relative to entity
+						IntVector relBlockPos = new IntVector(
+								(int) (Chunk.SIZE * (chunkPos.getMagX() - this.chunkPos.getMagX()) +
+										(blockPos.getMagX() - this.blockPos.getMagX())),
+								(int) (Chunk.SIZE * (chunkPos.getMagY() - this.chunkPos.getMagY()) +
+										(blockPos.getMagY() - this.blockPos.getMagY()))
+						);
 
-					if (vel.getMagY() > 0) {
-						blockPos.setMagY(blockPos.getMagY() + j);
-					} else if (vel.getMagY() < 0) {
-						blockPos.setMagY(blockPos.getMagY() - j);
-					}
-
-					if (this.collides((BlockCollidable) blocks[i][j], blockPos)) {
-						vel = new Vector2D(0,0);
+						//Step 3 of movement algorithm
+						//Check if the entity collides with the block
+						if (this.collides((BlockCollidable) blocks[i][j], relBlockPos)) {
+							//Step 4 of movement algorithm
+							//Restrict entity velocity
+							newVel = new Vector2D(0,0);
+						}
 					}
 				}
 			}
-		}
 
-		//Step 4 of collision algorithm:
-		super.move();
+			vel = newVel;
+
+			//Step 5 of movement algorithm:
+			super.move();
+		}
 	}
 }

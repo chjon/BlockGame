@@ -48,19 +48,6 @@ public class Vector2D {
 		return "[" + this.magX + "," + this.magY + "]";
 	}
 
-	//Calculate slope of vector
-	public float getSlope () {
-		if (magX == 0) {
-			if (magY > 0) {
-				return Float.POSITIVE_INFINITY;
-			} else if (magY < 0) {
-				return Float.NEGATIVE_INFINITY;
-			}
-		}
-
-		return magY / magX;
-	}
-
 	//Calculate magnitude squared of vector based on components (Pythagorean)
 	public float getMagSquared () {
 		return (float) Math.pow(magX, 2) + (float) Math.pow(magY, 2);

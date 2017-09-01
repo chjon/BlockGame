@@ -30,7 +30,7 @@ public class Game {
 		player = new Player(
 				this,
 				new IntVector(0, 0),
-				new Vector2D(2, 1),
+				new Vector2D(2, 2),
 				new Vector2D(),
 				chunkLoader
 		);

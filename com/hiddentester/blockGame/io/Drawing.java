@@ -50,7 +50,7 @@ public class Drawing extends JComponent {
 		offset = Vector2D.scale(offset, 1.0f / blockSize);
 		offset.setMagY(-offset.getMagY());
 
-		IntVector chunkPos = game.getPlayer().getChunkPos();
+		IntVector chunkPos = new IntVector(game.getPlayer().getChunkPos());
 		Vector2D relPos = Vector2D.add(offset, game.getPlayer().getBlockPos());
 
 		//Update chunkPos if the mouse is in a different chunk than the player
