@@ -7,17 +7,17 @@ package com.hiddentester.blockGame.core;
 import com.hiddentester.blockGame.blocks.Block;
 import com.hiddentester.blockGame.blocks.Block_Air;
 import com.hiddentester.blockGame.blocks.Block_Stone;
-import com.hiddentester.util.ChunkPosVector;
+import com.hiddentester.util.IntVector;
 
 public class Chunk {
 	public static final int SIZE = 16;
-	private ChunkPosVector pos;
+	private IntVector pos;
 	Block[][] blocks;
 
 	//Constructors:
 
-	public Chunk (ChunkPosVector pos) {
-		this.pos = new ChunkPosVector(pos);
+	public Chunk (IntVector pos) {
+		this.pos = new IntVector(pos);
 		blocks = new Block[SIZE][SIZE];
 
 		populate();
@@ -25,12 +25,16 @@ public class Chunk {
 
 	//Accessors:
 
-	public ChunkPosVector getPos () {
+	public IntVector getPos () {
 		return this.pos;
 	}
 
 	public Block[][] getBlocks () {
 		return blocks;
+	}
+
+	public Block getBlock (IntVector pos) {
+		return blocks[pos.getMagX()][pos.getMagY()];
 	}
 
 	//Converts chunk data to a string

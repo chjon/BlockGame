@@ -8,7 +8,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 
-import com.hiddentester.util.ChunkPosVector;
+import com.hiddentester.blockGame.blocks.Block_Dirt;
+import com.hiddentester.util.IntVector;
 import com.hiddentester.util.Vector2D;
 import com.hiddentester.blockGame.blocks.Block;
 import com.hiddentester.blockGame.blocks.Block_Stone;
@@ -46,11 +47,11 @@ public class Drawing extends JComponent {
 	public Vector2D getClickPos (Vector2D clickPos) {
 		Vector2D centre = new Vector2D(getWidth() / 2, getHeight() / 2);
 		Vector2D offset = Vector2D.sub(clickPos, centre);
-		offset = Vector2D.scale(offset, 1.0 / blockSize);
+		offset = Vector2D.scale(offset, 1.0f / blockSize);
 		offset.setMagY(-offset.getMagY());
 
-		ChunkPosVector chunkPos = game.getPlayer().getChunkPos();
-		Vector2D relPos = Vector2D.add(offset, game.getPlayer().getRelPos());
+		IntVector chunkPos = game.getPlayer().getChunkPos();
+		Vector2D relPos = Vector2D.add(offset, game.getPlayer().getBlockPos());
 
 		//Update chunkPos if the mouse is in a different chunk than the player
 
@@ -108,7 +109,7 @@ public class Drawing extends JComponent {
 							Vector2D relPos = Vector2D.sub(new Vector2D(
 									Chunk.SIZE * (curChunk.getPos().getMagX() - player.getChunkPos().getMagX()),
 									Chunk.SIZE * (curChunk.getPos().getMagY() - player.getChunkPos().getMagY())),
-									player.getRelPos()
+									player.getBlockPos()
 							);
 
 							relPos.setMagX(relPos.getMagX() + i);
@@ -118,6 +119,8 @@ public class Drawing extends JComponent {
 							//Select colour
 							if (blocks[i][j] instanceof Block_Stone) {
 								g.setColor(Color.GRAY);
+							} else if (blocks[i][j] instanceof Block_Dirt) {
+								g.setColor(Color.ORANGE);
 							} else {
 								g.setColor(Color.WHITE);
 							}
@@ -136,9 +139,30 @@ public class Drawing extends JComponent {
 		Vector2D relDim = Vector2D.scale(player.getDimensions(), blockSize);
 
 		g.setColor(Color.BLUE);
-		g.fillRect((int) (-0.5 * relDim.getMagX()), 0, (int) (relDim.getMagX()), -(int) (relDim.getMagY()));
+		g.fillRect(
+				(int) (-0.5 * relDim.getMagX()),
+				(int) (0.5 * relDim.getMagY()),
+				(int) (relDim.getMagX()),
+				-(int) (relDim.getMagY())
+		);
+
+		//Mark chunk
+		g.setColor(Color.RED);
+		g.translate(
+				-(int) (player.getBlockPos().getMagX() * blockSize),
+				(int) (player.getBlockPos().getMagY() * blockSize)
+		);
+
+		for (int i = 0; i <= Chunk.SIZE; i+=2) {
+			g.drawLine(0, -i * blockSize,Chunk.SIZE * blockSize,-i * blockSize);
+			g.drawLine(i * blockSize,0,i * blockSize,-Chunk.SIZE * blockSize);
+		}
 
 		//Reset graphics translation
+		g.translate(
+				(int) (player.getBlockPos().getMagX() * blockSize),
+				-(int) (player.getBlockPos().getMagY() * blockSize)
+		);
 		g.translate(-this.getWidth() / 2, -this.getHeight() / 2);
 
 		//Mark centre of screen
