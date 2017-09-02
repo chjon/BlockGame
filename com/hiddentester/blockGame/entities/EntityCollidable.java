@@ -69,7 +69,6 @@ public abstract class EntityCollidable extends Entity {
 
 			//Detect collision
 			if (!((slope1 > velSlope && slope2 > velSlope) || (slope1 < velSlope && slope2 < velSlope))) {
-				System.out.println(blockPos);
 				return true;
 			}
 		}
@@ -102,7 +101,6 @@ public abstract class EntityCollidable extends Entity {
 
 			//Detect collision
 			if ((slope1 > velSlope && slope2 < velSlope) || (slope1 < velSlope && slope2 > velSlope)) {
-				System.out.println(blockPos);
 				return true;
 			}
 		}
@@ -118,10 +116,10 @@ public abstract class EntityCollidable extends Entity {
 		//Change the block positions to account for the entity's dimensions based on its velocity
 
 		if (this.vel.getMagX() > 0) {
-			blockPos1.setMagX(blockPos1.getMagX() + this.dimensions.getMagX() / 2);
+			blockPos1.setMagX(blockPos1.getMagX() - this.dimensions.getMagX() / 2);
 			blockPos2.setMagX(blockPos2.getMagX() + this.dimensions.getMagX() / 2 + this.vel.getMagX());
 		} else if (this.vel.getMagX() < 0) {
-			blockPos1.setMagX(blockPos1.getMagX() - this.dimensions.getMagX() / 2);
+			blockPos1.setMagX(blockPos1.getMagX() + this.dimensions.getMagX() / 2);
 			blockPos2.setMagX(blockPos2.getMagX() - this.dimensions.getMagX() / 2 + this.vel.getMagX());
 		} else {
 			blockPos1.setMagX(blockPos1.getMagX() + this.dimensions.getMagX() / 2);
@@ -129,10 +127,10 @@ public abstract class EntityCollidable extends Entity {
 		}
 
 		if (this.vel.getMagY() > 0) {
-			blockPos1.setMagY(blockPos1.getMagY() + this.dimensions.getMagY() / 2);
+			blockPos1.setMagY(blockPos1.getMagY() - this.dimensions.getMagY() / 2);
 			blockPos2.setMagY(blockPos2.getMagY() + this.dimensions.getMagY() / 2 + this.vel.getMagY());
 		} else if (this.vel.getMagY() < 0) {
-			blockPos1.setMagY(blockPos1.getMagY() - this.dimensions.getMagY() / 2);
+			blockPos1.setMagY(blockPos1.getMagY() + this.dimensions.getMagY() / 2);
 			blockPos2.setMagY(blockPos2.getMagY() - this.dimensions.getMagY() / 2 + this.vel.getMagY());
 		} else {
 			blockPos1.setMagY(blockPos1.getMagY() + this.dimensions.getMagY() / 2);
@@ -211,8 +209,6 @@ public abstract class EntityCollidable extends Entity {
 	public void move () {
 		//Consider movement only if velocity is not zero
 		if (vel.getMagSquared() > 0) {
-			Vector2D newVel = new Vector2D(vel);
-
 			//Step 1 of movement algorithm
 			//Get array of blocks containing the entity and its destination
 			IntVector chunkPos1 = new IntVector(this.chunkPos);
@@ -247,24 +243,26 @@ public abstract class EntityCollidable extends Entity {
 						
 						//Calculate block position relative to entity
 						IntVector relBlockPos = new IntVector(
-								(int) (Chunk.SIZE * (chunkPos.getMagX() - this.chunkPos.getMagX()) +
-										(blockPos.getMagX() - this.blockPos.getMagX())),
-								(int) (Chunk.SIZE * (chunkPos.getMagY() - this.chunkPos.getMagY()) +
-										(blockPos.getMagY() - this.blockPos.getMagY()))
+								(Chunk.SIZE * (chunkPos.getMagX() - this.chunkPos.getMagX()) +
+										(blockPos.getMagX() - (int) Math.floor(this.blockPos.getMagX()))),
+								(Chunk.SIZE * (chunkPos.getMagY() - this.chunkPos.getMagY()) +
+										(blockPos.getMagY() - (int) Math.floor(this.blockPos.getMagY())))
 						);
+
+						System.out.println(blocks[i][j] + " " + relBlockPos);
 
 						//Step 3 of movement algorithm
 						//Check if the entity collides with the block
-						if (this.collides((BlockCollidable) blocks[i][j], relBlockPos)) {
-							//Step 4 of movement algorithm
-							//Restrict entity velocity
-							newVel = new Vector2D(0,0);
-						}
+
+						//For low velocities, the entity always collides with the block at this point
+
+						//Step 4 of movement algorithm
+						//Restrict entity velocity
+						this.vel.setMagX(0);
+						this.vel.setMagY(0);
 					}
 				}
 			}
-
-			vel = newVel;
 
 			//Step 5 of movement algorithm:
 			super.move();
