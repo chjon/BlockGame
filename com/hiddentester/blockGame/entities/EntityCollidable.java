@@ -12,10 +12,21 @@ import com.hiddentester.util.IntVector;
 import com.hiddentester.util.Vector2D;
 
 public abstract class EntityCollidable extends Entity {
+	//Gravity - downward acceleration
+	static final float GRAVITY = -0.006f;
+
+	//Friction - amount by which to slow down entities per tick
+	static final float FRICTION = 0.9f;
+
 	//Reference to game chunk loader to get blocks in world for collision calculation
 	private ChunkLoader chunkLoader;
 
-	//Constructor
+	//Data tags
+	protected boolean noGravity;		//Whether the entity is not affected by gravity
+	protected boolean onGround;		//Whether the entity is on the ground
+
+	//Constructors:
+
 	public EntityCollidable (
 			IntVector chunkPos, Vector2D blockPos, Vector2D vel, Vector2D dimensions,
 			ChunkLoader chunkLoader
@@ -23,89 +34,79 @@ public abstract class EntityCollidable extends Entity {
 		super(chunkPos, blockPos, vel, dimensions);
 
 		this.chunkLoader = chunkLoader;
+		this.noGravity = true;
+		this.onGround = true;
+	}
+
+	public EntityCollidable (
+			IntVector chunkPos, Vector2D blockPos, Vector2D vel, Vector2D dimensions,
+			ChunkLoader chunkLoader, boolean noGravity, boolean onGround
+	) {
+		super(chunkPos, blockPos, vel, dimensions);
+
+		this.chunkLoader = chunkLoader;
+		this.noGravity = noGravity;
+		this.onGround = onGround;
 	}
 
 	//Determine whether the entity will collide with a block
 
-	//------[Summary of Collision Detection Algorithm]------\\
-	//														\\
-	//	1.	Determine which faces may be involved in a		\\
-	//		collision based on the entity's velocity.		\\
-	//														\\
-	//	2.	Compare the slopes of the lines connecting		\\
-	//		opposite ends of the collidable surfaces with	\\
-	//		the slope of the entity's velocity.	There is 	\\
-	//		no collision if the slopes are both higher or	\\
-	//		lower than the slope of the velocity.			\\
-	//														\\
-	//------------------------------------------------------\\
+	//----[Summary of collision detection algorithm]----\\
+	//													\\
+	//	1.	Find a scale factor of the velocity that	\\
+	//		will intersect the entity with the block.	\\
+	//		If such a value exists between 0 and 1		\\
+	// 		inclusive, there will be a collision.		\\
+	//													\\
+	//--------------------------------------------------\\
 
-	private boolean collides (BlockCollidable block, IntVector blockPos) {
-		//Check side surfaces if the entity's velocity has a horizontal component
-		if (this.vel.getMagX() != 0) {
-			float blockSurfaceX = blockPos.getMagX();
-			float entitySurfaceX = this.blockPos.getMagX();
-			float slope1, slope2, velSlope;
+	private void setVelAfterCollision (BlockCollidable block, IntVector relBlockPos) {
+		//Limits on the scale factor
+		float	scaleFactor, scaleFactorX, scaleFactorY;
 
-			//Select surfaces to check depending on the direction of the entity's movement
-			if (this.vel.getMagX() < 0) {
-				entitySurfaceX -= this.dimensions.getMagX() / 2;
-				blockSurfaceX++;
+		//Determine the min/max horizontal scale factors based on the direction of the entity's velocity
 
-				if (blockSurfaceX > entitySurfaceX) {
-					return false;
-				}
-			} else {
-				entitySurfaceX += this.dimensions.getMagX() / 2;
+		if (this.vel.getMagX() > 0) {			//Moving right
+			scaleFactorX =
+					(relBlockPos.getMagX() - this.blockPos.getMagX() - this.dimensions.getMagX() / 2) / this.vel.getMagX();
 
-				if (blockSurfaceX < entitySurfaceX) {
-					return false;
-				}
-			}
+		} else if (this.vel.getMagX() < 0) {	//Moving left
+			scaleFactorX =
+					(relBlockPos.getMagX() - this.blockPos.getMagX() + this.dimensions.getMagX() / 2 + 1) / this.vel.getMagX();
 
-			slope1 = ((blockPos.getMagY()) - (this.blockPos.getMagY() + this.dimensions.getMagY() / 2)) / (blockSurfaceX - entitySurfaceX);
-			slope2 = ((blockPos.getMagY() + 1) - (this.blockPos.getMagY() - this.dimensions.getMagY() / 2)) / (blockSurfaceX - entitySurfaceX);
-			velSlope = this.vel.getMagY() / this.vel.getMagX();
-
-			//Detect collision
-			if (!((slope1 > velSlope && slope2 > velSlope) || (slope1 < velSlope && slope2 < velSlope))) {
-				return true;
-			}
+		} else {								//Not moving horizontally
+			scaleFactorX = 0;
 		}
 
-		//Check top/bottom surfaces if the entity's velocity has a vertical component
-		if (this.vel.getMagY() != 0) {
-			float blockSurfaceY = blockPos.getMagY();
-			float entitySurfaceY = this.blockPos.getMagY();
-			float slope1, slope2, velSlope;
+		//Determine the min/max vertical scale factors based on the direction of the entity's velocity
 
-			//Select surfaces to check depending on the direction of the entity's movement
-			if (this.vel.getMagY() < 0) {
-				entitySurfaceY -= this.dimensions.getMagY() / 2;
-				blockSurfaceY++;
+		if (this.vel.getMagY() > 0) {			//Moving up
+			scaleFactorY =
+					(relBlockPos.getMagY() - this.blockPos.getMagY() - this.dimensions.getMagY() / 2) / this.vel.getMagY();
 
-				if (blockSurfaceY > entitySurfaceY) {
-					return false;
-				}
-			} else {
-				entitySurfaceY += this.dimensions.getMagY() / 2;
+		} else if (this.vel.getMagY() < 0) {	//Moving down
+			scaleFactorY =
+					(relBlockPos.getMagY() - this.blockPos.getMagY() + this.dimensions.getMagY() / 2 + 1) / this.vel.getMagY();
 
-				if (blockSurfaceY < entitySurfaceY) {
-					return false;
-				}
-			}
-
-			slope1 = ((blockPos.getMagX()) - (this.blockPos.getMagX() + this.dimensions.getMagX() / 2)) / (blockSurfaceY - entitySurfaceY);
-			slope2 = ((blockPos.getMagX() + 1) - (this.blockPos.getMagX() - this.dimensions.getMagX() / 2)) / (blockSurfaceY - entitySurfaceY);
-			velSlope = this.vel.getMagX() / this.vel.getMagY();
-
-			//Detect collision
-			if ((slope1 > velSlope && slope2 < velSlope) || (slope1 < velSlope && slope2 > velSlope)) {
-				return true;
-			}
+		} else {								//Not moving vertically
+			scaleFactorY = 0;
 		}
 
-		return false;
+		//Determine the min/max scale factor
+		scaleFactor = Math.max(scaleFactorX, scaleFactorY);
+
+		//Determine whether a collision is possible
+		if (0 < scaleFactor && scaleFactor <= 1) {
+			//Update velocity
+			if (scaleFactor == scaleFactorX) {
+				this.vel.setMagX(0.1f * scaleFactor * this.vel.getMagX());
+			} else {
+				this.vel.setMagY(0.1f * scaleFactor * this.vel.getMagY());
+
+				//Update data tag
+				this.onGround = true;
+			}
+		}
 	}
 
 	//Find a set of vectors bounding the entire entity and its destination
@@ -195,18 +196,27 @@ public abstract class EntityCollidable extends Entity {
 	// 		entity, look for collidable blocks.		\\
 	// 												\\
 	//	3.	Determine whether the collidable		\\
-	// 		surface is in the path of movement.		\\
-	//												\\
-	//	4.	Change the velocity such that a			\\
+	// 		surface is in the path of movement		\\
+	//		and change the velocity such that a		\\
 	// 		subsequent movement will not surpass	\\
 	// 		the discovered surface.					\\
 	// 												\\
-	//	5.	Move the entity.						\\
+	//	4.	Move the entity.						\\
 	// 												\\
 	//----------------------------------------------\\
 
 	@Override
 	public void move () {
+		//Accelerate entity due to gravity
+		if (!this.noGravity) {
+			this.vel.setMagY(this.vel.getMagY() + GRAVITY);
+		}
+
+		//Update data tags
+		if (this.vel.getMagY() > 0) {
+			this.onGround = false;
+		}
+
 		//Consider movement only if velocity is not zero
 		if (vel.getMagSquared() > 0) {
 			//Step 1 of movement algorithm
@@ -223,9 +233,29 @@ public abstract class EntityCollidable extends Entity {
 					chunkPos2, new IntVector(blockPos2)
 			);
 
-			//Loop through blocks
-			for (int i = 0; i < blocks.length; i++) {
-				for (int j = 0; j < blocks[i].length; j++) {
+			int directionX, directionY;
+
+			//Find direction of entity based on velocity
+			if (this.vel.getMagX() >= 0) {
+				directionX = 1;
+			} else {
+				directionX = -1;
+			}
+
+			if (this.vel.getMagY() >= 0) {
+				directionY = 1;
+			} else {
+				directionY = -1;
+			}
+
+			//Loop through blocks starting from the entity
+			for (	int i = (directionX > 0) ? (0) : (blocks.length - 1);
+					(directionX > 0) ? (i < blocks.length) : (i >= 0);
+					i += (directionX > 0) ? (1) : (-1)) {
+				for (	int j = (directionY > 0) ? (0) : (blocks[i].length - 1);
+						(directionY > 0) ? (j < blocks[i].length) : (j >= 0);
+						j += (directionY > 0) ? (1) : (-1)) {
+
 					//Step 2 of movement algorithm:
 					//Check if block is collidable
 					if (blocks[i][j] instanceof BlockCollidable) {
@@ -240,32 +270,41 @@ public abstract class EntityCollidable extends Entity {
 								((i + (int) Math.floor(blockPos1.getMagX())) % Chunk.SIZE + Chunk.SIZE) % Chunk.SIZE,
 								((j + (int) Math.floor(blockPos1.getMagY())) % Chunk.SIZE + Chunk.SIZE) % Chunk.SIZE
 						);
-						
+
 						//Calculate block position relative to entity
 						IntVector relBlockPos = new IntVector(
 								(Chunk.SIZE * (chunkPos.getMagX() - this.chunkPos.getMagX()) +
-										(blockPos.getMagX() - (int) Math.floor(this.blockPos.getMagX()))),
+										(blockPos.getMagX())),
 								(Chunk.SIZE * (chunkPos.getMagY() - this.chunkPos.getMagY()) +
-										(blockPos.getMagY() - (int) Math.floor(this.blockPos.getMagY())))
+										(blockPos.getMagY()))
 						);
 
-						System.out.println(blocks[i][j] + " " + relBlockPos);
-
 						//Step 3 of movement algorithm
-						//Check if the entity collides with the block
+						//Check if the entity collides with the block and restrict entity velocity
 
-						//For low velocities, the entity always collides with the block at this point
-
-						//Step 4 of movement algorithm
-						//Restrict entity velocity
-						this.vel.setMagX(0);
-						this.vel.setMagY(0);
+						this.setVelAfterCollision((BlockCollidable) blocks[i][j], relBlockPos);
 					}
 				}
 			}
 
-			//Step 5 of movement algorithm:
+			//Step 4 of movement algorithm:
+			//Move entity
 			super.move();
+
+			//Scale velocity according to friction
+			if (this.onGround) {
+				this.vel = Vector2D.scale(this.vel, FRICTION);
+
+				//Set velocity to zero if sufficiently small
+
+				if (Math.abs(this.vel.getMagX()) < Math.pow(10, -4)) {
+					this.vel.setMagX(0);
+				}
+
+				if (Math.abs(this.vel.getMagY()) < Math.pow(10, -4)) {
+					this.vel.setMagY(0);
+				}
+			}
 		}
 	}
 }

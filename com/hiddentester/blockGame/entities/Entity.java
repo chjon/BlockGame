@@ -9,7 +9,6 @@ import com.hiddentester.util.Vector2D;
 import com.hiddentester.blockGame.core.Chunk;
 
 public abstract class Entity {
-	static final float FRICTION = 0.90f;
 	protected IntVector chunkPos;				//Position of the chunk containing the centre of the entity
 	protected Vector2D blockPos;				//Position of the centre of the entity relative to the chunk it is in
 	protected Vector2D vel;						//Velocity of the entity in blocks per tick.
@@ -79,26 +78,10 @@ public abstract class Entity {
 		//Change position according to velocity
 
 		//Find target position
-		Vector2D newPos = Vector2D.add(getBlockPos(), vel);
+		setBlockPos(Vector2D.add(getBlockPos(), this.vel));
 
-		//Update chunkPos if player has passed between chunks
-		updateChunkPos(this.chunkPos, newPos);
-
-		//Update current position
-		setBlockPos(newPos);
-
-		//Scale velocity according to friction
-		this.vel = Vector2D.scale(this.vel, FRICTION);
-
-		//Set velocity to zero if sufficiently small
-
-		if (Math.abs(this.vel.getMagX()) < Math.pow(10, -4)) {
-			this.vel.setMagX(0);
-		}
-
-		if (Math.abs(this.vel.getMagY()) < Math.pow(10, -4)) {
-			this.vel.setMagY(0);
-		}
+		//Update position if entity has passed between chunks
+		updateChunkPos(this.chunkPos, this.blockPos);
 	}
 
 	//Update chunk coordinates if an entity has passed between chunks

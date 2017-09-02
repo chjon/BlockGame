@@ -13,6 +13,11 @@ import com.hiddentester.blockGame.core.Game;
 public class Player extends EntityCollidable {
 	private static final Vector2D DIMENSIONS = new Vector2D(0.6f, 1.8f);
 
+	//Jumping speed
+	private static final float JUMP_SPEED = - 20 * GRAVITY;
+	private static final float JUMP_COOLDOWN = 15;
+	private float jumpCooldown = 0;
+
 	//Maximum sneaking speed in blocks per second
 	private static final float SNEAK_SPEED = 1;
 
@@ -26,7 +31,7 @@ public class Player extends EntityCollidable {
 
 	//Constructor
 	public Player (Game game, IntVector chunkPos, Vector2D blockPos, Vector2D vel, ChunkLoader chunkLoader) {
-		super(chunkPos, blockPos, vel, DIMENSIONS, chunkLoader);
+		super(chunkPos, blockPos, vel, DIMENSIONS, chunkLoader, false, true);
 		this.game = game;
 	}
 
@@ -60,6 +65,14 @@ public class Player extends EntityCollidable {
 
 	@Override
 	public void move () {
+		//Update jump cooldown
+		if (this.onGround && jumpCooldown > 0) {
+			jumpCooldown--;
+		} else if (!this.onGround) {
+			jumpCooldown = JUMP_COOLDOWN;
+		}
+
+		//Select movement speed based on keys pressed
 		float selectedSpeed = WALK_SPEED;
 
 		if (game.getKeyboard().isDown(16)) {
@@ -71,20 +84,29 @@ public class Player extends EntityCollidable {
 		//Amount by which to change velocity per entity tick
 		float acceleration = selectedSpeed * (1 - FRICTION) / FRICTION / GameClock.ENTITY_TICKS_PER_SECOND;
 
+		//Jump
 		if (game.getKeyboard().isDown(87) || game.getKeyboard().isDown(38)) {
-			game.getPlayer().accelerate(new Vector2D(0, acceleration));
+			if (this.onGround && jumpCooldown == 0) {
+				this.accelerate(new Vector2D(0, JUMP_SPEED - EntityCollidable.GRAVITY));
+				jumpCooldown = JUMP_COOLDOWN;
+			}
 		}
 
+		//Move down
 		if (game.getKeyboard().isDown(83) || game.getKeyboard().isDown(40)) {
-			game.getPlayer().accelerate(new Vector2D(0, -acceleration));
+			this.accelerate(new Vector2D(0, -acceleration));
 		}
 
-		if (game.getKeyboard().isDown(68) || game.getKeyboard().isDown(39)) {
-			game.getPlayer().accelerate(new Vector2D(acceleration, 0));
-		}
+		if (Math.abs(vel.getMagX()) < selectedSpeed / GameClock.ENTITY_TICKS_PER_SECOND) {
+			//Move right
+			if (game.getKeyboard().isDown(68) || game.getKeyboard().isDown(39)) {
+				this.accelerate(new Vector2D(acceleration, 0));
+			}
 
-		if (game.getKeyboard().isDown(65) || game.getKeyboard().isDown(37)) {
-			game.getPlayer().accelerate(new Vector2D(-acceleration, 0));
+			//Move left
+			if (game.getKeyboard().isDown(65) || game.getKeyboard().isDown(37)) {
+				this.accelerate(new Vector2D(-acceleration, 0));
+			}
 		}
 
 		super.move();

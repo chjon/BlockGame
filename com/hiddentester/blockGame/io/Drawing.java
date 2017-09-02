@@ -18,10 +18,15 @@ import com.hiddentester.blockGame.entities.Player;
 import com.hiddentester.blockGame.core.Chunk;
 
 public class Drawing extends JComponent {
-	private static final int FIELD_OF_VIEW = 32;		//This defines how many blocks fit across the window
-	private int blockSize;								//This is the size of a block in pixels
-	private ImageIcon[] textures;						//This is an array of textures to use
+	private static final int FIELD_OF_VIEW = 32;			//This defines how many blocks fit across the window
+	private int blockSize;									//This is the size of a block in pixels
+	private ImageIcon[] textures;							//This is an array of textures to use
 	private Game game;
+
+	//Debug variables:
+
+	//This determines whether chunk outlines should be drawn
+	private static final boolean DEBUG_DRAW_CHUNK_OUTLINES = false;
 
 	//Constructor
 	public Drawing (Game game) {
@@ -147,27 +152,29 @@ public class Drawing extends JComponent {
 		);
 
 		//Mark chunk
-		g.setColor(Color.RED);
-		g.translate(
-				-(int) (player.getBlockPos().getMagX() * blockSize),
-				(int) (player.getBlockPos().getMagY() * blockSize)
-		);
+		if (DEBUG_DRAW_CHUNK_OUTLINES) {
+			g.setColor(Color.RED);
+			g.translate(
+					-(int) (player.getBlockPos().getMagX() * blockSize),
+					(int) (player.getBlockPos().getMagY() * blockSize)
+			);
 
-		for (int i = 0; i <= Chunk.SIZE; i+=2) {
-			g.drawLine(0, -i * blockSize,Chunk.SIZE * blockSize,-i * blockSize);
-			g.drawLine(i * blockSize,0,i * blockSize,-Chunk.SIZE * blockSize);
+			for (int i = 0; i <= Chunk.SIZE; i += 2) {
+				g.drawLine(0, -i * blockSize, Chunk.SIZE * blockSize, -i * blockSize);
+				g.drawLine(i * blockSize, 0, i * blockSize, -Chunk.SIZE * blockSize);
+			}
+
+			//Reset graphics translation
+			g.translate(
+					(int) (player.getBlockPos().getMagX() * blockSize),
+					-(int) (player.getBlockPos().getMagY() * blockSize)
+			);
+			g.translate(-this.getWidth() / 2, -this.getHeight() / 2);
+
+			//Mark centre of screen
+			g.setColor(Color.GREEN);
+			g.drawLine(0, getHeight() / 2, getWidth(), getHeight() / 2);
+			g.drawLine(getWidth() / 2, 0, getWidth() / 2, getHeight());
 		}
-
-		//Reset graphics translation
-		g.translate(
-				(int) (player.getBlockPos().getMagX() * blockSize),
-				-(int) (player.getBlockPos().getMagY() * blockSize)
-		);
-		g.translate(-this.getWidth() / 2, -this.getHeight() / 2);
-
-		//Mark centre of screen
-		g.setColor(Color.GREEN);
-		g.drawLine(0, getHeight() / 2, getWidth(), getHeight() / 2);
-		g.drawLine(getWidth() / 2, 0, getWidth() / 2, getHeight());
 	}
 }
