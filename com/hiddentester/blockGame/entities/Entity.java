@@ -4,60 +4,58 @@
 
 package com.hiddentester.blockGame.entities;
 
-import com.hiddentester.util.ChunkPosVector;
+import com.hiddentester.util.IntVector;
 import com.hiddentester.util.Vector2D;
 import com.hiddentester.blockGame.core.Chunk;
 
 public abstract class Entity {
-	static final double FRICTION = 0.90;
-	protected ChunkPosVector chunkPos;			//Position of the chunk containing the entity
-	protected Vector2D relPos;					//Position of the entity relative to the chunk it is in
-	protected Vector2D vel;						//Velocity of entity in blocks per tick.
+	static final float FRICTION = 0.90f;
+	protected IntVector chunkPos;				//Position of the chunk containing the centre of the entity
+	protected Vector2D blockPos;				//Position of the centre of the entity relative to the chunk it is in
+	protected Vector2D vel;						//Velocity of the entity in blocks per tick.
 	protected Vector2D dimensions;
 
 	//Constructor
-	public Entity (ChunkPosVector chunkPos, Vector2D relPos, Vector2D vel, Vector2D dimensions) {
+	public Entity (IntVector chunkPos, Vector2D blockPos, Vector2D vel, Vector2D dimensions) {
 		this.chunkPos = chunkPos;
-		setRelPos(relPos);
+		setBlockPos(blockPos);
 		this.vel = vel;
 		this.dimensions = dimensions;
 	}
 
 	//Accessors/Mutators:
 
-	public ChunkPosVector getChunkPos() {
+	public IntVector getChunkPos() {
 		return chunkPos;
 	}
 
-	public void setChunkPos(ChunkPosVector chunkPos) {
+	public void setChunkPos(IntVector chunkPos) {
 		this.chunkPos = chunkPos;
 	}
 
-	public Vector2D getRelPos () {
-		return this.relPos;
+	public Vector2D getBlockPos () {
+		return this.blockPos;
 	}
 
-	public void setRelPos (Vector2D relPos) {
-		relPos.setMagX((relPos.getMagX() % Chunk.SIZE + Chunk.SIZE) % Chunk.SIZE);
-		relPos.setMagY((relPos.getMagY() % Chunk.SIZE + Chunk.SIZE) % Chunk.SIZE);
-		this.relPos = relPos;
+	private void setBlockPos (Vector2D blockPos) {
+		this.blockPos = blockPos;
 	}
 
 	public Vector2D getAbsPos () {
 		return Vector2D.add(new Vector2D(
 				chunkPos.getMagX() * Chunk.SIZE,
 				chunkPos.getMagY() * Chunk.SIZE),
-				relPos
+				blockPos
 		);
 	}
 
 	public void setAbsPos (Vector2D absPos) {
-		chunkPos = new ChunkPosVector(
+		chunkPos = new IntVector(
 				(int) Math.floor(absPos.getMagX() / Chunk.SIZE),
 				(int) Math.floor(absPos.getMagY() / Chunk.SIZE)
 		);
 
-		setRelPos(absPos);
+		setBlockPos(absPos);
 	}
 
 	public Vector2D getVel () {
@@ -79,27 +77,48 @@ public abstract class Entity {
 	//Move entity
 	public void move () {
 		//Change position according to velocity
-		Vector2D newPos = Vector2D.add(getRelPos(), vel);
+
+		//Find target position
+		Vector2D newPos = Vector2D.add(getBlockPos(), vel);
 
 		//Update chunkPos if player has passed between chunks
+		updateChunkPos(this.chunkPos, newPos);
 
-		if (newPos.getMagX() < 0 || newPos.getMagX() >= Chunk.SIZE) {
-			chunkPos.setMagX(chunkPos.getMagX() + (int) Math.floor(newPos.getMagX() / Chunk.SIZE));
-		}
-
-		if (newPos.getMagY() < 0 || newPos.getMagY() >= Chunk.SIZE) {
-			chunkPos.setMagY(chunkPos.getMagY() + (int) Math.floor(newPos.getMagY() / Chunk.SIZE));
-		}
-
-		setRelPos(newPos);
+		//Update current position
+		setBlockPos(newPos);
 
 		//Scale velocity according to friction
 		this.vel = Vector2D.scale(this.vel, FRICTION);
+
+		//Set velocity to zero if sufficiently small
+
+		if (Math.abs(this.vel.getMagX()) < Math.pow(10, -4)) {
+			this.vel.setMagX(0);
+		}
+
+		if (Math.abs(this.vel.getMagY()) < Math.pow(10, -4)) {
+			this.vel.setMagY(0);
+		}
+	}
+
+	//Update chunk coordinates if an entity has passed between chunks
+	static void updateChunkPos (IntVector chunkPos, Vector2D blockPos) {
+		//Update x-coordinate
+		if (blockPos.getMagX() < 0 || blockPos.getMagX() >= Chunk.SIZE) {
+			chunkPos.setMagX(chunkPos.getMagX() + (int) Math.floor(blockPos.getMagX() / Chunk.SIZE));
+			blockPos.setMagX((blockPos.getMagX() % Chunk.SIZE + Chunk.SIZE) % Chunk.SIZE);
+		}
+
+		//Update y-coordinate
+		if (blockPos.getMagY() < 0 || blockPos.getMagY() >= Chunk.SIZE) {
+			chunkPos.setMagY(chunkPos.getMagY() + (int) Math.floor(blockPos.getMagY() / Chunk.SIZE));
+			blockPos.setMagY((blockPos.getMagY() % Chunk.SIZE + Chunk.SIZE) % Chunk.SIZE);
+		}
 	}
 
 	//Converts entity data to a string
 	@Override
 	public String toString () {
-		return "(" + this.chunkPos + "," + this.relPos + "," + this.vel + "," + this.dimensions + ")";
+		return "(" + this.chunkPos + "," + this.blockPos + "," + this.vel + "," + this.dimensions + ")";
 	}
 }

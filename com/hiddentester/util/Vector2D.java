@@ -5,7 +5,7 @@
 package com.hiddentester.util;
 
 public class Vector2D {
-	private double magX, magY;
+	private float magX, magY;
 
 	//Constructors:
 
@@ -14,7 +14,7 @@ public class Vector2D {
 		this.magY = 0;
 	}
 
-	public Vector2D (double magX, double magY) {
+	public Vector2D (float magX, float magY) {
 		this.magX = magX;
 		this.magY = magY;
 	}
@@ -26,19 +26,19 @@ public class Vector2D {
 
 	//Accessor/Mutators:
 
-	public double getMagX () {
+	public float getMagX () {
 		return this.magX;
 	}
 
-	public void setMagX (double magX) {
+	public void setMagX (float magX) {
 		this.magX = magX;
 	}
 
-	public double getMagY () {
+	public float getMagY () {
 		return this.magY;
 	}
 
-	public void setMagY (double magY) {
+	public void setMagY (float magY) {
 		this.magY = magY;
 	}
 
@@ -49,17 +49,17 @@ public class Vector2D {
 	}
 
 	//Calculate magnitude squared of vector based on components (Pythagorean)
-	public double getMagSquared () {
-		return Math.pow(magX, 2) + Math.pow(magY, 2);
+	public float getMagSquared () {
+		return (float) Math.pow(magX, 2) + (float) Math.pow(magY, 2);
 	}
 
 	//Calculate magnitude of vector based on components (Pythagorean)
-	public double getMag () {
-		return Math.sqrt(getMagSquared());
+	public float getMag () {
+		return (float) Math.sqrt(getMagSquared());
 	}
 
 	//Calculate magnitude of vector based on components (Manhattan)
-	public double getMagManhattan () {
+	public float getMagManhattan () {
 		return Math.abs(magX) + Math.abs(magY);
 	}
 
@@ -82,7 +82,7 @@ public class Vector2D {
 	}
 
 	//Scale a vector
-	public static Vector2D scale (Vector2D a, double scaleFactor) {
+	public static Vector2D scale (Vector2D a, float scaleFactor) {
 		return new Vector2D(
 				a.magX * scaleFactor,
 				a.magY * scaleFactor
@@ -90,7 +90,7 @@ public class Vector2D {
 	}
 
 	//Set the magnitude of a vector without changing direction
-	public static Vector2D setMag (Vector2D a, double mag) throws IllegalDirectionException {
+	public static Vector2D setMag (Vector2D a, float mag) throws IllegalDirectionException {
 		if (a.getMagManhattan() == 0) {
 			throw new IllegalDirectionException();
 		}
@@ -104,7 +104,7 @@ public class Vector2D {
 			throw new IllegalDirectionException();
 		}
 
-		return scale(new Vector2D(Math.cos(ang), Math.sin(ang)), a.getMag());
+		return scale(new Vector2D((float) Math.cos(ang), (float) Math.sin(ang)), a.getMag());
 	}
 
 	//Calculate the sum of two vectors
