@@ -249,10 +249,10 @@ public abstract class EntityCollidable extends Entity {
 			}
 
 			//Loop through blocks starting from the entity
-			for (	int i = (directionX > 0) ? (0) : (blocks.length - 1);
+			for (int i = (directionX > 0) ? (0) : (blocks.length - 1);
 					(directionX > 0) ? (i < blocks.length) : (i >= 0);
 					i += (directionX > 0) ? (1) : (-1)) {
-				for (	int j = (directionY > 0) ? (0) : (blocks[i].length - 1);
+				for (int j = (directionY > 0) ? (0) : (blocks[i].length - 1);
 						(directionY > 0) ? (j < blocks[i].length) : (j >= 0);
 						j += (directionY > 0) ? (1) : (-1)) {
 

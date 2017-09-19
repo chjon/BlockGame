@@ -5,8 +5,8 @@
 package com.hiddentester.blockGame.core;
 
 import com.hiddentester.blockGame.blocks.Block;
-import com.hiddentester.blockGame.blocks.Block_Air;
-import com.hiddentester.blockGame.blocks.Block_Stone;
+import com.hiddentester.blockGame.blocks.instantiable.Block_Air;
+import com.hiddentester.blockGame.blocks.instantiable.Block_Stone;
 import com.hiddentester.util.IntVector;
 
 public class Chunk {
