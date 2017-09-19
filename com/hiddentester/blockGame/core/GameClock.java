@@ -10,7 +10,8 @@ public class GameClock extends Thread {
 	public static final int ENTITY_TICKS_PER_SECOND = 100;
 	public static final int CHUNK_TICK_LENGTH = MILLIS_IN_SECOND / CHUNK_TICKS_PER_SECOND;
 	public static final int ENTITY_TICK_LENGTH = MILLIS_IN_SECOND / ENTITY_TICKS_PER_SECOND;
-	public Game game;
+
+	private Game game;
 
 	//Constructor
 	GameClock (Game game) {

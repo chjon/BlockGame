@@ -15,7 +15,7 @@ public class Player extends EntityCollidable {
 
 	//Jumping speed
 	private static final float JUMP_SPEED = - 20 * GRAVITY;
-	private static final float JUMP_COOLDOWN = 15;
+	private static final float JUMP_COOLDOWN = 10;
 	private float jumpCooldown = 0;
 
 	//Maximum sneaking speed in blocks per second

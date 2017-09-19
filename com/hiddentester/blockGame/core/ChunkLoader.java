@@ -5,9 +5,9 @@
 package com.hiddentester.blockGame.core;
 
 import com.hiddentester.blockGame.blocks.Block;
-import com.hiddentester.blockGame.blocks.Block_Air;
-import com.hiddentester.blockGame.blocks.Block_Dirt;
-import com.hiddentester.blockGame.blocks.Block_Stone;
+import com.hiddentester.blockGame.blocks.instantiable.Block_Air;
+import com.hiddentester.blockGame.blocks.instantiable.Block_Dirt;
+import com.hiddentester.blockGame.blocks.instantiable.Block_Stone;
 import com.hiddentester.util.IntVector;
 
 import java.io.BufferedReader;
@@ -18,7 +18,7 @@ import java.io.FileWriter;
 public class ChunkLoader {
 	private static final String SAVE_DIRECTORY = "BlockGame/saves";
 	private static final String CHUNK_DIRECTORY = "chunks";
-	static final int LOADED_RADIUS = 3;				//"Radius" of square of chunks to load around the player
+	static final int LOADED_RADIUS = 2;				//"Radius" of square of chunks to load around the player
 	private String saveFile;
 	private Chunk[][] loadedChunks;
 	private Game game;
@@ -99,11 +99,11 @@ public class ChunkLoader {
 				String[] data = in.readLine().split(",");
 
 				for (int j = 0; j < loadedChunk.blocks[i].length; j++) {
-					if (data[j].equals("Block_Air")) {
+					if (data[j].equals(Block_Air.BLOCK_ID + "")) {
 						loadedChunk.blocks[i][j] = new Block_Air();
-					} else if (data[j].equals("Block_Stone")) {
+					} else if (data[j].equals(Block_Stone.BLOCK_ID + "")) {
 						loadedChunk.blocks[i][j] = new Block_Stone();
-					} else if (data[j].equals("Block_Dirt")) {
+					} else if (data[j].equals(Block_Dirt.BLOCK_ID + "")) {
 						loadedChunk.blocks[i][j] = new Block_Dirt();
 					}
 				}
@@ -132,7 +132,7 @@ public class ChunkLoader {
 
 			for (int i = 0; i < blocks.length; i++) {
 				for (int j = 0; j < blocks[i].length; j++) {
-					out.write("Block_" + blocks[i][j].getName() + ",");
+					out.write(blocks[i][j].getBlockID() + ",");
 				}
 
 				out.newLine();

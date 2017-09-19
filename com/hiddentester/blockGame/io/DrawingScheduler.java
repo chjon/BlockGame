@@ -15,7 +15,12 @@ public class DrawingScheduler extends Thread {
 	@Override
 	public void run () {
 		while (true) {
-			draw.repaint();
+			try {
+				Thread.sleep(10);
+				draw.repaint();
+			} catch (Exception e) {
+
+			}
 		}
 	}
 }

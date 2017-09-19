@@ -5,20 +5,21 @@
 package com.hiddentester.blockGame.blocks;
 
 public abstract class Block {
-	protected String name;
+	protected int blockID;
+	protected String className;
 	protected int miningLevel;
 
 	//Constructor
-	public Block (String name, int miningLevel) {
-		this.name = name;
+	public Block (int blockID, String className, int miningLevel) {
+		this.blockID = blockID;
+		this.className = className;
 		this.miningLevel = miningLevel;
 	}
 
 	//Accessors:
 
-	public String getName() {
-		return this.name;
-	}
+	public abstract String getClassName();
+	public abstract int getBlockID();
 
 	public int getMiningLevel() {
 		return this.miningLevel;
@@ -27,6 +28,6 @@ public abstract class Block {
 	//Converts block data to a string
 	@Override
 	public String toString () {
-		return "(" + name + ")";
+		return "(" + className + ")";
 	};
 }
