@@ -31,7 +31,7 @@ public class Player extends EntityCollidable {
 
 	//Constructor
 	public Player (Game game, IntVector chunkPos, Vector2D blockPos, Vector2D vel, ChunkLoader chunkLoader) {
-		super(chunkPos, blockPos, vel, DIMENSIONS, chunkLoader, false, true);
+		super(chunkPos, blockPos, vel, DIMENSIONS, chunkLoader, false, false);
 		this.game = game;
 	}
 

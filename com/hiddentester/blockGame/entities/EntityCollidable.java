@@ -213,7 +213,7 @@ public abstract class EntityCollidable extends Entity {
 		}
 
 		//Update data tags
-		if (this.vel.getMagY() > 0) {
+		if (this.vel.getMagY() != 0) {
 			this.onGround = false;
 		}
 
@@ -292,18 +292,16 @@ public abstract class EntityCollidable extends Entity {
 			super.move();
 
 			//Scale velocity according to friction
-			if (this.onGround) {
-				this.vel = Vector2D.scale(this.vel, FRICTION);
+			this.vel.setMagX(this.vel.getMagX() * FRICTION);
 
-				//Set velocity to zero if sufficiently small
+			//Set velocity to zero if sufficiently small
 
-				if (Math.abs(this.vel.getMagX()) < Math.pow(10, -4)) {
-					this.vel.setMagX(0);
-				}
+			if (Math.abs(this.vel.getMagX()) < Math.pow(10, -4)) {
+				this.vel.setMagX(0);
+			}
 
-				if (Math.abs(this.vel.getMagY()) < Math.pow(10, -4)) {
-					this.vel.setMagY(0);
-				}
+			if (Math.abs(this.vel.getMagY()) < Math.pow(10, -4)) {
+				this.vel.setMagY(0);
 			}
 		}
 	}
