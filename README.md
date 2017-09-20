@@ -1,2 +1,2 @@
 # BlockGame
-Free roam, puzzle, sandbox? I don't know yet.
+Procedurally generated free-roam sandbox, probably.
