@@ -13,10 +13,10 @@ import com.hiddentester.util.Vector2D;
 
 public abstract class EntityCollidable extends Entity {
 	//Gravity - downward acceleration
-	static final float GRAVITY = -0.006f;
+	protected static final float GRAVITY = -0.006f;
 
 	//Friction - amount by which to slow down entities per tick
-	static final float FRICTION = 0.9f;
+	protected static final float FRICTION = 0.90f;
 
 	//Reference to game chunk loader to get blocks in world for collision calculation
 	private ChunkLoader chunkLoader;

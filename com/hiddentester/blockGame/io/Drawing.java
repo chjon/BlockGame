@@ -11,7 +11,7 @@ import com.hiddentester.util.IntVector;
 import com.hiddentester.util.Vector2D;
 import com.hiddentester.blockGame.blocks.Block;
 import com.hiddentester.blockGame.core.Game;
-import com.hiddentester.blockGame.entities.Player;
+import com.hiddentester.blockGame.entities.instantiable.Player;
 import com.hiddentester.blockGame.core.Chunk;
 
 public class Drawing extends JComponent {
@@ -25,8 +25,10 @@ public class Drawing extends JComponent {
 			"BlockGame/res/textures";
 	private static final String BLOCK_DIRECTORY =			//This is the name of the block textures subdirectory
 			"blocks";
+	private static final String ENTITY_DIRECTORY =			//This is the name of the entity texture subdirectory
+			"entities";
 	private ImageIcon[] blockTextures;						//This is an array of block textures to use
-
+	private ImageIcon[] entityTextures;						//This is an array of entity textures to use
 
 	//Debug variables:
 
@@ -39,11 +41,26 @@ public class Drawing extends JComponent {
 		this.game = game;
 		updateScale();
 		blockTextures = loadBlockTextures(BLOCK_DIRECTORY);
+		entityTextures = loadEntityTextures(ENTITY_DIRECTORY);
 	}
 
-	//Load textures
+	//Load block textures
 	private ImageIcon[] loadBlockTextures (String folderName) {
 		String[] blockNames = game.getBlockNames();
+		ImageIcon[] textures = new ImageIcon[blockNames.length];
+
+		for (int i = 0; i < textures.length; i++) {
+			textures[i] = new ImageIcon(
+					TEXTURE_DIRECTORY + "/" + folderName + "/" + blockNames[i] + ".png"
+			);
+		}
+
+		return textures;
+	}
+
+	//Load block textures
+	private ImageIcon[] loadEntityTextures (String folderName) {
+		String[] blockNames = game.getEntityNames();
 		ImageIcon[] textures = new ImageIcon[blockNames.length];
 
 		for (int i = 0; i < textures.length; i++) {
@@ -105,6 +122,18 @@ public class Drawing extends JComponent {
 		Player player = game.getPlayer();
 		Chunk[][] loadedChunks = game.getChunkLoader().getLoadedChunks();
 
+		//Draw player
+		Vector2D relDim = Vector2D.scale(player.getDimensions(), blockSize);
+
+		g.drawImage(
+				entityTextures[0].getImage(),
+				(int) (-0.5 * relDim.getMagX()),
+				(int) (0.5 * relDim.getMagY()) - (int) (relDim.getMagY()),
+				(int) (relDim.getMagX()),
+				(int) (relDim.getMagY()),
+				this
+		);
+
 		//Loop through each chunk
 		for (int chunk_i = 0; chunk_i < loadedChunks.length; chunk_i++) {
 			for (int chunk_j = 0; chunk_j < loadedChunks[chunk_i].length; chunk_j++) {
@@ -147,9 +176,9 @@ public class Drawing extends JComponent {
 								g.drawImage(
 										blockTextures[blockID].getImage(),
 										(int) (relPos.getMagX()),
-										-(int) (relPos.getMagY()),
+										-(int) (relPos.getMagY()) - blockSize,
 										blockSize,
-										-blockSize,
+										blockSize,
 										this
 								);
 							}
@@ -160,17 +189,6 @@ public class Drawing extends JComponent {
 				}
 			}
 		}
-
-		//Draw player
-		Vector2D relDim = Vector2D.scale(player.getDimensions(), blockSize);
-
-		g.setColor(Color.BLUE);
-		g.fillRect(
-				(int) (-0.5 * relDim.getMagX()),
-				(int) (0.5 * relDim.getMagY()),
-				(int) (relDim.getMagX()),
-				-(int) (relDim.getMagY())
-		);
 
 		//Mark chunk
 		if (DEBUG_DRAW_CHUNK_OUTLINES) {

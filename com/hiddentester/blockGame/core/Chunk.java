@@ -5,8 +5,7 @@
 package com.hiddentester.blockGame.core;
 
 import com.hiddentester.blockGame.blocks.Block;
-import com.hiddentester.blockGame.blocks.instantiable.Block_Air;
-import com.hiddentester.blockGame.blocks.instantiable.Block_Stone;
+import com.hiddentester.blockGame.blocks.instantiable.*;
 import com.hiddentester.util.IntVector;
 
 public class Chunk {
@@ -63,8 +62,15 @@ public class Chunk {
 	private void populate () {
 		for (int i = 0; i < SIZE; i++) {
 			for (int j = 0; j < SIZE; j++) {
-				if (Chunk.SIZE / 2 * (Math.sin((pos.getMagX() * Chunk.SIZE + i) / (double) Chunk.SIZE)) < Chunk.SIZE * pos.getMagY() + j) {
+				if (Chunk.SIZE / 2 * (Math.sin((pos.getMagX() * Chunk.SIZE + i) / (double) Chunk.SIZE))
+						< Chunk.SIZE * pos.getMagY() + j) {
 					blocks[i][j] = new Block_Air();
+				} else if (Chunk.SIZE / 2 * (Math.sin((pos.getMagX() * Chunk.SIZE + i) / (double) Chunk.SIZE))
+						< Chunk.SIZE * pos.getMagY() + j + 1) {
+					blocks[i][j] = new Block_Grass();
+				} else if (Chunk.SIZE / 2 * (Math.sin((pos.getMagX() * Chunk.SIZE + i) / (double) Chunk.SIZE))
+						< Chunk.SIZE * pos.getMagY() + j + 4) {
+					blocks[i][j] = new Block_Dirt();
 				} else {
 					blocks[i][j] = new Block_Stone();
 				}
