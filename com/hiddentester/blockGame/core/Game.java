@@ -8,7 +8,7 @@ import com.hiddentester.blockGame.blocks.instantiable.*;
 import com.hiddentester.blockGame.entities.Entity;
 import com.hiddentester.util.IntVector;
 import com.hiddentester.util.Vector2D;
-import com.hiddentester.blockGame.entities.Player;
+import com.hiddentester.blockGame.entities.instantiable.Player;
 import com.hiddentester.blockGame.io.*;
 
 import java.io.File;
@@ -18,6 +18,9 @@ public class Game {
 	private static final String BLOCK_DIRECTORY =				//Directory of list of blocks
 			"BlockGame/com/hiddentester/blockGame/blocks/instantiable";
 
+	private static final String ENTITY_DIRECTORY =				//Directory of list of entities
+			"BlockGame/com/hiddentester/blockGame/entities/instantiable";
+
 	//References to other core objects
 	private ChunkLoader chunkLoader;
 	private Window window;
@@ -26,11 +29,12 @@ public class Game {
 
 	private Player player;
 	private ArrayList<Entity> entities;
-	private String[] blockNames;
+	private String[] blockNames, entityNames;
 
 	//Constructor
 	Game (String saveFile) {
 		assignBlockIDs(BLOCK_DIRECTORY);
+		assignEntityIDs(ENTITY_DIRECTORY);
 
 		GameClock gameClock = new GameClock(this);
 		chunkLoader = new ChunkLoader(saveFile, this);
@@ -70,6 +74,10 @@ public class Game {
 
 	public String[] getBlockNames () {
 		return blockNames;
+	}
+
+	public String[] getEntityNames () {
+		return entityNames;
 	}
 
 	public ChunkLoader getChunkLoader() {
@@ -124,6 +132,25 @@ public class Game {
 			blockNames[0] = Block_Air	.CLASS_NAME;
 			blockNames[1] = Block_Stone	.CLASS_NAME;
 			blockNames[2] = Block_Dirt	.CLASS_NAME;
+			blockNames[3] = Block_Grass	.CLASS_NAME;
+		}
+	}
+
+	//Assign every entity a numerical ID
+	private void assignEntityIDs (String folderName) {
+		//Get all files in directory
+
+		File folder = new File( folderName + "/");
+		File[] files = folder.listFiles();
+
+		//Empty array if block files are not found
+		if (files == null) {
+			entityNames = new String[0];
+		} else {
+			//Create class list
+			entityNames = new String[files.length];
+
+			entityNames[0] = Player.CLASS_NAME;
 		}
 	}
 }
