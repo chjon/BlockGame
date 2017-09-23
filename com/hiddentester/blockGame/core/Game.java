@@ -57,7 +57,7 @@ public class Game {
 		Drawing draw = new Drawing(this);
 		draw.setFocusable(true);
 		keyboard = new Keyboard();
-		mouse = new Mouse(draw);
+		mouse = new Mouse(this, draw);
 		draw.addKeyListener(keyboard);
 		draw.addMouseListener(mouse);
 

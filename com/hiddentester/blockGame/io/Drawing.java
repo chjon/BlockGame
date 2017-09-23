@@ -72,8 +72,8 @@ public class Drawing extends JComponent {
 		return textures;
 	}
 
-	//Converts mouse click coordinates to block coordinates
-	Vector2D getClickPos (Vector2D clickPos) {
+	//Converts mouse click coordinates to chunk coordinates
+	IntVector getChunkPosFromMouse (Vector2D clickPos) {
 		Vector2D centre = new Vector2D(getWidth() / 2, getHeight() / 2);
 		Vector2D offset = Vector2D.sub(clickPos, centre);
 		offset = Vector2D.scale(offset, 1.0f / blockSize);
@@ -92,14 +92,23 @@ public class Drawing extends JComponent {
 			chunkPos.setMagY(chunkPos.getMagY() + (int) Math.floor(relPos.getMagY() / Chunk.SIZE));
 		}
 
+		return chunkPos;
+	}
+
+	//Converts mouse coordinates to chunk-relative block coordinates
+	Vector2D getRelPosFromMouse (Vector2D clickPos) {
+		Vector2D centre = new Vector2D(getWidth() / 2, getHeight() / 2);
+		Vector2D offset = Vector2D.sub(clickPos, centre);
+		offset = Vector2D.scale(offset, 1.0f / blockSize);
+		offset.setMagY(-offset.getMagY());
+
+		Vector2D relPos = Vector2D.add(offset, game.getPlayer().getBlockPos());
+
 		//Take the modulo of each component of the vector
 		relPos.setMagX((relPos.getMagX() % Chunk.SIZE + Chunk.SIZE) % Chunk.SIZE);
 		relPos.setMagY((relPos.getMagY() % Chunk.SIZE + Chunk.SIZE) % Chunk.SIZE);
 
-		return new Vector2D(
-				chunkPos.getMagX() * Chunk.SIZE + relPos.getMagX(),
-				chunkPos.getMagY() * Chunk.SIZE + relPos.getMagY()
-		);
+		return relPos;
 	}
 
 	//Calculate scaling of the block
@@ -113,8 +122,8 @@ public class Drawing extends JComponent {
 		updateScale();
 
 		//Fill background
-		g.setColor(Color.WHITE);
-		g.fillRect(0, 0, getWidth(), getHeight());
+		//g.setColor(Color.WHITE);
+		//g.fillRect(0, 0, getWidth(), getHeight());
 
 		//Offset graphics
 		g.translate(this.getWidth() / 2, this.getHeight() / 2);
@@ -162,26 +171,14 @@ public class Drawing extends JComponent {
 
 							int blockID = blocks[i][j].getBlockID();
 
-							if (blockID == -1) {
-								g.setColor(Color.ORANGE);
-
-								//Draw block
-								g.fillRect(
-										(int) (relPos.getMagX()),
-										-(int) (relPos.getMagY()),
-										blockSize,
-										-blockSize
-								);
-							} else {
-								g.drawImage(
-										blockTextures[blockID].getImage(),
-										(int) (relPos.getMagX()),
-										-(int) (relPos.getMagY()) - blockSize,
-										blockSize,
-										blockSize,
-										this
-								);
-							}
+							g.drawImage(
+									blockTextures[blockID].getImage(),
+									(int) (relPos.getMagX()),
+									-(int) (relPos.getMagY()) - blockSize,
+									blockSize,
+									blockSize,
+									this
+							);
 						}
 					}
 				} catch (NullPointerException e) {

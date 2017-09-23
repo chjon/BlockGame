@@ -4,15 +4,20 @@
 
 package com.hiddentester.blockGame.io;
 
+import com.hiddentester.blockGame.blocks.instantiable.Block_Air;
+import com.hiddentester.blockGame.core.Game;
+import com.hiddentester.util.IntVector;
 import com.hiddentester.util.Vector2D;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 public class Mouse implements MouseListener {
+	private Game game;
 	private Drawing context;
 
-	public Mouse (Drawing context) {
+	public Mouse (Game game, Drawing context) {
+		this.game = game;
 		this.context = context;
 	}
 
@@ -23,7 +28,11 @@ public class Mouse implements MouseListener {
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		System.out.println(context.getClickPos(new Vector2D(e.getX(), e.getY())));
+		Vector2D clickPos = new Vector2D(e.getX(), e.getY());
+		IntVector chunkPos = context.getChunkPosFromMouse(clickPos);
+		Vector2D relPos = context.getRelPosFromMouse(clickPos);
+
+		game.getChunkLoader().setBlock(chunkPos, relPos, new Block_Air());
 	}
 
 	@Override

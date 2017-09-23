@@ -48,6 +48,11 @@ public class IntVector {
 		return "[" + this.magX + "," + this.magY + "]";
 	}
 
+	//Compare two vectors
+	public boolean equals (IntVector comparand) {
+		return magX == comparand.magX && magY == comparand.magY;
+	}
+
 	//Calculate the sum of two vectors
 	public static IntVector add (IntVector a, IntVector b) {
 		return new IntVector(

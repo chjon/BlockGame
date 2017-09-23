@@ -5,15 +5,11 @@
 package com.hiddentester.blockGame.core;
 
 import com.hiddentester.blockGame.blocks.Block;
-import com.hiddentester.blockGame.blocks.instantiable.Block_Air;
-import com.hiddentester.blockGame.blocks.instantiable.Block_Dirt;
-import com.hiddentester.blockGame.blocks.instantiable.Block_Stone;
+import com.hiddentester.blockGame.blocks.instantiable.*;
 import com.hiddentester.util.IntVector;
+import com.hiddentester.util.Vector2D;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 
 public class ChunkLoader {
 	private static final String SAVE_DIRECTORY = "BlockGame/saves";
@@ -85,15 +81,32 @@ public class ChunkLoader {
 	}
 
 	//Load chunk
-	private Chunk load (IntVector pos) {
+	private Chunk load (IntVector chunkPos) {
+		//Load chunk from loaded array
+		if (loadedChunks[LOADED_RADIUS][LOADED_RADIUS] != null) {
+			IntVector offset = IntVector.sub(
+					chunkPos,
+					loadedChunks[LOADED_RADIUS][LOADED_RADIUS].getPos()
+			);
+
+			//Get chunk from loaded array
+			for (Chunk[] chunkArray : loadedChunks) {
+				for (Chunk tempChunk : chunkArray) {
+					if (tempChunk != null && tempChunk.getPos().equals(chunkPos)) {
+						return tempChunk;
+					}
+				}
+			}
+		}
+
+		//Load chunk from file
 		try {
 			BufferedReader in = new BufferedReader(new FileReader(
 					SAVE_DIRECTORY + "/" + saveFile + "/" + CHUNK_DIRECTORY + "/" +
-							pos.getMagX() + " " + pos.getMagY() + ".txt"
-					)
-			);
+					chunkPos.getMagX() + " " + chunkPos.getMagY() + ".txt"
+			));
 
-			Chunk loadedChunk = new Chunk(pos);
+			Chunk loadedChunk = new Chunk(chunkPos);
 
 			for (int i = 0; i < loadedChunk.blocks.length; i++) {
 				String[] data = in.readLine().split(",");
@@ -105,26 +118,37 @@ public class ChunkLoader {
 						loadedChunk.blocks[i][j] = new Block_Stone();
 					} else if (data[j].equals(Block_Dirt.BLOCK_ID + "")) {
 						loadedChunk.blocks[i][j] = new Block_Dirt();
+					} else if (data[j].equals(Block_Grass.BLOCK_ID + "")) {
+						loadedChunk.blocks[i][j] = new Block_Grass();
 					}
 				}
 			}
 
 			in.close();
 
+			System.out.println("[WORLD] Loaded chunk at " + chunkPos);
 			return loadedChunk;
 		} catch (java.io.FileNotFoundException e) {
-			return new Chunk(pos);
+			System.out.println("[WORLD] Created new chunk at " + chunkPos);
+			return new Chunk(chunkPos);
 		} catch (java.io.IOException e) {
-			return new Chunk(pos);
+			System.out.println("[WORLD] Failed to load chunk at " + chunkPos);
+			System.out.println("[WORLD] Created new chunk at " + chunkPos);
+			return new Chunk(chunkPos);
 		}
 	}
 
 	//Save chunk to file
 	private void save (Chunk chunk) {
 		try {
+			//Create the save directory
+			if ((new File(SAVE_DIRECTORY + "/" + saveFile + "/" + CHUNK_DIRECTORY + "/")).mkdirs()) {
+				System.out.println("[WORLD] Created save directory");
+			}
+
 			BufferedWriter out = new BufferedWriter(new FileWriter(
 					SAVE_DIRECTORY + "/" + saveFile + "/" + CHUNK_DIRECTORY + "/" +
-							chunk.getPos().getMagX() + " " + chunk.getPos().getMagY() + ".txt",
+					chunk.getPos().getMagX() + " " + chunk.getPos().getMagY() + ".txt",
 					false)
 			);
 
@@ -139,8 +163,10 @@ public class ChunkLoader {
 			}
 
 			out.close();
+
+			System.out.println("[WORLD] Saved chunk at " + chunk.getPos());
 		} catch (java.io.IOException e) {
-			System.out.println("Failed to save chunk at: " + chunk.getPos());
+			System.out.println("[WORLD] Failed to save chunk at " + chunk.getPos());
 		}
 	}
 
@@ -251,5 +277,15 @@ public class ChunkLoader {
 		}
 
 		return blocks;
+	}
+
+	//Get a specific block
+	public Block getBlock (IntVector chunkPos, Vector2D relPos) {
+		return load(chunkPos).getBlock(relPos);
+	}
+
+	//Set a specific block
+	public void setBlock (IntVector chunkPos, Vector2D relPos, Block block) {
+		load(chunkPos).setBlock(relPos, block);
 	}
 }

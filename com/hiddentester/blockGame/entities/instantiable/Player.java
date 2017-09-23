@@ -96,7 +96,7 @@ public class Player extends EntityCollidable {
 
 		//Move down
 		if (game.getKeyboard().isDown(83) || game.getKeyboard().isDown(40)) {
-			this.accelerate(new Vector2D(0, -acceleration));
+			//this.accelerate(new Vector2D(0, -acceleration));
 		}
 
 		if (Math.abs(vel.getMagX()) < selectedSpeed / GameClock.ENTITY_TICKS_PER_SECOND) {

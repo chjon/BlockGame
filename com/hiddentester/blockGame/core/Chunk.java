@@ -7,6 +7,7 @@ package com.hiddentester.blockGame.core;
 import com.hiddentester.blockGame.blocks.Block;
 import com.hiddentester.blockGame.blocks.instantiable.*;
 import com.hiddentester.util.IntVector;
+import com.hiddentester.util.Vector2D;
 
 public class Chunk {
 	public static final int SIZE = 16;
@@ -32,8 +33,25 @@ public class Chunk {
 		return blocks;
 	}
 
-	public Block getBlock (IntVector pos) {
-		return blocks[pos.getMagX()][pos.getMagY()];
+	Block getBlock (Vector2D relPos) {
+		return getBlock(
+				new IntVector((int)(relPos.getMagX()), (int)(relPos.getMagY()))
+		);
+	}
+
+	Block getBlock (IntVector relPos) {
+		return blocks[relPos.getMagX()][relPos.getMagY()];
+	}
+
+	void setBlock (Vector2D relPos, Block block) {
+		setBlock(
+				new IntVector((int)(relPos.getMagX()), (int)(relPos.getMagY())),
+				block
+		);
+	}
+
+	void setBlock (IntVector relPos, Block block) {
+		blocks[relPos.getMagX()][relPos.getMagY()] = block;
 	}
 
 	//Converts chunk data to a string

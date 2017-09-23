@@ -22,7 +22,7 @@ public abstract class EntityCollidable extends Entity {
 	private ChunkLoader chunkLoader;
 
 	//Data tags
-	protected boolean noGravity;		//Whether the entity is not affected by gravity
+	protected boolean noGravity;	//Whether the entity is not affected by gravity
 	protected boolean onGround;		//Whether the entity is on the ground
 
 	//Constructors:
