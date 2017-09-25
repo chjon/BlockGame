@@ -31,7 +31,7 @@ public class ChunkLoader {
 		return loadedChunks;
 	}
 
-	//Load chunks that need to be loaded
+	//Load chunks around the player
 	void loadChunks () {
 		IntVector playerPos = game.getPlayer().getChunkPos();
 
@@ -40,11 +40,21 @@ public class ChunkLoader {
 			for (int j = 0; j < loadedChunks[i].length; j++) {
 				//Check if chunk needs to be loaded
 				if (loadedChunks[i][j] == null) {
+					//Load chunk
 					loadedChunks[i][j] = load(new IntVector(
 							playerPos.getMagX() - (i - LOADED_RADIUS + 1),
 							playerPos.getMagY() - (j - LOADED_RADIUS + 1))
 					);
 				}
+			}
+		}
+	}
+
+	//Save all loaded chunks
+	void saveChunks () {
+		for (Chunk[] chunkArray : loadedChunks) {
+			for (Chunk curChunk : chunkArray) {
+				saveChunk(curChunk);
 			}
 		}
 	}
@@ -69,7 +79,7 @@ public class ChunkLoader {
 					temp[destPos.getMagX()][destPos.getMagY()] = loadedChunks[i][j];
 				//Unload chunk
 				} else {
-					save(loadedChunks[i][j]);
+					saveChunk(loadedChunks[i][j]);
 				}
 			}
 		}
@@ -139,7 +149,7 @@ public class ChunkLoader {
 	}
 
 	//Save chunk to file
-	private void save (Chunk chunk) {
+	private void saveChunk (Chunk chunk) {
 		try {
 			//Create the save directory
 			if ((new File(SAVE_DIRECTORY + "/" + saveFile + "/" + CHUNK_DIRECTORY + "/")).mkdirs()) {

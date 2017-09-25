@@ -28,6 +28,6 @@ public abstract class Block {
 	//Converts block data to a string
 	@Override
 	public String toString () {
-		return "(" + className + ")";
-	};
+		return "(" + blockID + ", " + className + ")";
+	}
 }

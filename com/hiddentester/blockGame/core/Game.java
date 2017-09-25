@@ -64,7 +64,7 @@ public class Game {
 		DrawingScheduler drawScheduler = new DrawingScheduler(draw);
 		drawScheduler.start();
 
-		window = new Window(saveFile, draw);
+		window = new Window(this, saveFile, draw);
 
 		//Start game
 		gameClock.start();
@@ -98,6 +98,11 @@ public class Game {
 
 	public Mouse getMouse() {
 		return mouse;
+	}
+
+	//Save all loaded chunks
+	public void saveGame () {
+		chunkLoader.saveChunks();
 	}
 
 	//Update loaded chunks if player has moved to a new chunk
